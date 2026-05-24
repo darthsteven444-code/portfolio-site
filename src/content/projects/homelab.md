@@ -41,11 +41,20 @@ Grafana runs on HTTPS with a lab-CA-signed certificate and hosts dashboards for 
 
 ## AI Infrastructure
 
-A separate VM uses PCI passthrough to grant direct access to two NVIDIA GPUs — a Quadro P4000 and a GTX 1650 — for a combined 12 GB of pooled VRAM. The VM runs Ollama for local LLM hosting, so data never leaves the lab.
+A dedicated VM uses PCI passthrough to grant direct access to an NVIDIA Quadro P4000 (8 GB VRAM). The VM runs Ollama for local LLM hosting, so data never leaves the lab.
+
+## Self-Hosted Services
+
+CasaOS runs on its own VM as a container dashboard for the rest of my self-hosted stack:
+
+- **Jellyfin** — media server, with an NVIDIA GTX 1650 passed through for hardware-accelerated video transcoding (NVENC/NVDEC)
+- **Shoko Server** — anime library manager with a SQLite/MySQL backend on the SSD tier; tuned for fast hash and metadata processing across thousands of files
+- **Audiobookshelf** — self-hosted audiobook library, accessible from mobile and web
 
 ## What I Learned
 
 - VLAN design and inter-VLAN firewall rule authoring in OPNsense
 - Active Directory OU structure, GPO authoring, certificate template design
 - Prometheus relabeling and dashboard editing
+- PCI passthrough (IOMMU/VFIO) for GPU-accelerated VMs
 - The difference between "it works" and "it's hardened" — and how to get from one to the other
