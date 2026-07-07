@@ -28,59 +28,54 @@ const projects = [
     blurb: "Built a Windows Server 2022 domain controller, authored custom certificate templates, and issued trusted TLS certs to lab services.",
     href: "/projects/ad-pki",
   },
-  {
-    title: "Hospital IT Lab",
-    blurb: "A hospital in a jar — isolated AD forest, HIPAA-style GPO hardening, GLPI service desk, and zero-trust browser RDP. Built from scratch, sealed off from production.",
-    href: "/projects/hospital-it-lab",
-  },
 ];
 ---
-
 <Base>
-  <header class="mb-14">
-    <p class="seclabel mb-3">~/whoami<span class="blink"></span></p>
-    <h1 class="text-4xl font-bold tracking-tight">Steven <span class="glow">Garcia</span></h1>
-    <p class="text-zinc-400 mt-3" style="font-family:var(--mono);font-size:13.5px;color:var(--dim)">Navy Veteran · CIS Student · Homelab Engineer</p>
+  <header class="mb-16">
+    <h1 class="text-3xl font-semibold tracking-tight">Steven Garcia</h1>
+    <p class="text-zinc-400 mt-2">Navy Veteran · CIS Student · Homelab Engineer</p>
   </header>
 
-  <section class="mb-14">
-    <h2 class="seclabel mb-4">// about</h2>
-    <p class="leading-relaxed" style="color:var(--ink)">
+  <section class="mb-16">
+    <h2 class="text-sm uppercase tracking-widest text-zinc-500 mb-4">about</h2>
+    <p class="text-zinc-300 leading-relaxed">
       I'm Steven — transitioning into IT after a decade across Navy engineering, hospital technology, and state facility infrastructure. Currently studying Computer Information Systems at Southwest Texas College and running a multi-VLAN homelab where I learn the tools real teams run.
     </p>
-    <p class="leading-relaxed mt-4" style="color:var(--ink)">
+    <p class="text-zinc-300 leading-relaxed mt-4">
       This site itself runs on my own infrastructure: Ubuntu + nginx, behind Cloudflare, monitored with Prometheus and Grafana.
     </p>
   </section>
 
-  <section class="mb-14">
-    <h2 class="seclabel mb-4">// projects</h2>
-    <ul class="space-y-3">
+  <section class="mb-16">
+    <h2 class="text-sm uppercase tracking-widest text-zinc-500 mb-4">projects</h2>
+    <ul class="space-y-6">
       {projects.map((p) => (
         <li>
-          <a href={p.href} class="proj-card block">
-            <h3 class="font-medium">
-              {p.title} <span class="arrow">→</span>
+          <a href={p.href} class="group block">
+            <h3 class="font-medium text-zinc-100 group-hover:text-white">
+              {p.title} <span class="text-zinc-600 group-hover:text-zinc-400">→</span>
             </h3>
-            <p class="text-sm mt-1">{p.blurb}</p>
+            <p class="text-zinc-400 text-sm mt-1">{p.blurb}</p>
           </a>
         </li>
       ))}
     </ul>
   </section>
 
-  <section class="mb-14">
-    <h2 class="seclabel mb-4">// elsewhere</h2>
-    <ul class="flex gap-3 flex-wrap">
+  <section class="mb-16">
+    <h2 class="text-sm uppercase tracking-widest text-zinc-500 mb-4">elsewhere</h2>
+    <ul class="flex gap-6 text-zinc-300">
       {links.map((l) => (
         <li>
-          <a href={l.href} class="chip" target="_blank" rel="noopener">{l.label}</a>
+          <a href={l.href} class="lowercase underline decoration-zinc-600 hover:decoration-zinc-100" target="_blank" rel="noopener">
+            {l.label}
+          </a>
         </li>
       ))}
     </ul>
   </section>
 
-  <footer class="foot mt-24">
-    <span class="accent">$</span> self-hosted on a homelab in uvalde, tx
+  <footer class="text-xs text-zinc-600 mt-24">
+    steven-garcia.dev · self-hosted on a homelab in uvalde, tx
   </footer>
 </Base>

@@ -1,11 +1,7 @@
 ---
 import "../styles/global.css";
-const {
-  title = "steven garcia",
-  description = "navy veteran. cis student. homelab tinkerer.",
-} = Astro.props;
+const { title = "steven garcia", description = "navy veteran. cis student. homelab tinkerer." } = Astro.props;
 ---
-
 <!doctype html>
 <html lang="en">
   <head>
@@ -20,13 +16,7 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
-  <body class="antialiased min-h-screen flex flex-col">
-    <nav class="term-bar">
-      <div class="inner">
-        <span><span class="dot">●</span> <a href="/">steven-garcia.dev</a> <span class="muted">~ %</span></span>
-        <span class="muted">uvalde, tx</span>
-      </div>
-    </nav>
+  <body class="bg-zinc-950 text-zinc-100 antialiased min-h-screen flex flex-col">
     <div class="max-w-2xl mx-auto px-6 py-16 w-full flex-1">
       <slot />
     </div>
