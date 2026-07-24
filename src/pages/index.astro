@@ -33,6 +33,21 @@ const projects = [
     blurb: "A hospital in a jar — isolated AD forest, HIPAA-style GPO hardening, GLPI service desk, and zero-trust browser RDP. Built from scratch, sealed off from production.",
     href: "/projects/hospital-it-lab",
   },
+  {
+    title: "Hardening a Kubernetes Cluster",
+    blurb: "Took a live k3s cluster from 'it works' to 'it's defended' — Trivy image scanning, RBAC, Pod Security, default-deny NetworkPolicy, and proving detection with a live attack watched in Wazuh.",
+    href: "/projects/k8s-security-hardening",
+  },
+  {
+    title: "Backups That Actually Restore",
+    blurb: "A two-layer disaster-recovery strategy — Velero for cluster state, Proxmox for VM disks — restore-tested by deliberately deleting things and bringing them back.",
+    href: "/projects/backup-dr",
+  },
+  {
+    title: "The Pipeline That Ships This Site",
+    blurb: "A GitHub Actions CI/CD pipeline that builds a hardened, non-root container image and publishes it to GHCR automatically on every version tag.",
+    href: "/projects/cicd-pipeline",
+  },
 ];
 ---
 
