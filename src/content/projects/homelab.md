@@ -86,3 +86,13 @@ Two GPUs, two jobs: the Quadro P4000 for AI, the GTX 1650 for video. Both physic
 - *Prometheus relabeling and dashboard editing* — making metrics useful, not just numerous
 - *PCI passthrough (IOMMU/VFIO)* for GPU-accelerated VMs — and how to wrestle the host kernel into giving up a device
 - The difference between *"it works"* and *"it's hardened"* — and how to get from one to the other
+
+## Where It's Going Now
+
+That lab was the foundation. Since then, the story moved up the stack — from *building* the infrastructure to *defending, backing up, and automating* it. The portfolio site you're reading now runs on a three-node Kubernetes cluster inside this lab, and I've spent a run of late nights turning it into something that behaves like a real production environment:
+
+- **[Hardening a Kubernetes Cluster](/projects/k8s-security-hardening)** — image scanning, RBAC least-privilege, Pod Security Standards, default-deny networking, and proving detection with a live attack against my own cluster.
+- **[Backups That Actually Restore](/projects/backup-dr)** — a two-layer disaster-recovery strategy for the cluster and its VMs, restore-tested by deliberately deleting things.
+- **[Building the Pipeline That Ships This Site](/projects/cicd-pipeline)** — a GitHub Actions CI/CD pipeline that builds a hardened, non-root container image and publishes it automatically on every version tag.
+
+Same box. Same lab. A whole lot more *hardened* than where it started.
