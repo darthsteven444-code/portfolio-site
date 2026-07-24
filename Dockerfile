@@ -7,8 +7,10 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# ---- Stage 2: serve ----
-FROM nginx:alpine
+# ---- Stage 2: serve (unprivileged, non-root) ----
+FROM nginxinc/nginx-unprivileged:alpine
+USER root
 RUN apk upgrade --no-cache
+USER nginx
 COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080
