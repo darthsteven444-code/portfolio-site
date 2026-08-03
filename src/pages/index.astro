@@ -1,101 +1,249 @@
 ---
-import Base from "../layouts/Base.astro";
+// src/pages/index.astro
+import Base from '../layouts/Base.astro';
+import topology from '../assets/homelab-topology.svg?raw';
 
-const links = [
-  { label: "github", href: "https://github.com/darthsteven444-code" },
-  { label: "linkedin", href: "https://www.linkedin.com/in/steven-garcia-cis/" },
-  { label: "email", href: "mailto:contact@steven-garcia.dev" },
+const METRICS = [
+  { n: '17',   l: 'virtual machines' },
+  { n: '5',    l: 'VLAN segments' },
+  { n: '63',   l: 'pods running' },
+  { n: '88',   l: 'CPU threads' },
+  { n: '10TB', l: 'ZFS storage' },
+  { n: '11s',  l: 'restore drill' },
 ];
 
-const projects = [
+const PROJECTS = [
   {
-    title: "Homelab",
-    blurb: "Multi-VLAN Proxmox lab — Active Directory, PKI, OPNsense firewall, Ubuntu services, full monitoring stack.",
-    href: "/projects/homelab",
+    title: 'Infrastructure Overview',
+    blurb: 'Start here. The whole environment on one page — what runs where, how the segments are separated, and how every project below connects into a single system.',
+    href: '/infrastructure',
+    status: 'Start here',
+    tone: 'chip-acc',
+    feature: true,
   },
   {
-    title: "This Site",
-    blurb: "The site you're reading — Astro on Ubuntu + nginx, fronted by Cloudflare Tunnel, with Prometheus uptime probes and Discord alerts.",
-    href: "/projects/this-site",
+    title: 'Hardening a Kubernetes Cluster',
+    blurb: 'Took a live k3s cluster from "it works" to "it is defended" — image scanning, RBAC, Pod Security, default-deny network policy. Then I attacked it myself and watched my SIEM catch me.',
+    href: '/projects/k8s-security-hardening',
+    status: 'Defended',
+    tone: 'chip-sig',
+    shot: '/shots/wazuh-agents.webp',
   },
   {
-    title: "System-Health Monitor",
-    blurb: "Bash health-monitoring script with thresholds, journalctl forensics, and Discord alerting via a systemd timer.",
-    href: "/projects/system-health",
+    title: 'Backups That Actually Restore',
+    blurb: 'Two layers of disaster recovery — Velero for cluster state, Proxmox for VM disks. Proven by deliberately destroying things. The Kubernetes drill came back in eleven seconds.',
+    href: '/projects/backup-dr',
+    status: 'Restore-tested',
+    tone: 'chip-ok',
+    shot: '/shots/velero-backup-restore.webp',
   },
   {
-    title: "Windows Server Domain & PKI",
-    blurb: "Built a Windows Server 2022 domain controller, authored custom certificate templates, and issued trusted TLS certs to lab services.",
-    href: "/projects/ad-pki",
+    title: 'Hospital IT Lab',
+    blurb: 'A hospital in a jar. Isolated AD forest, HIPAA-style GPO hardening, a live GLPI service desk, and zero-trust browser RDP. I work nights in a hospital — I wanted to see it from the IT side.',
+    href: '/projects/hospital-it-lab',
+    status: 'Running',
+    tone: 'chip-ok',
+    shot: '/shots/glpi-service-desk.webp',
   },
   {
-    title: "Hospital IT Lab",
-    blurb: "A hospital in a jar — isolated AD forest, HIPAA-style GPO hardening, GLPI service desk, and zero-trust browser RDP. Built from scratch, sealed off from production.",
-    href: "/projects/hospital-it-lab",
+    title: 'Windows Server Domain & PKI',
+    blurb: 'A Windows Server 2022 domain with real organizational units, custom certificate templates, and a root CA issuing trusted certs to lab services. Most people never touch AD CS. I wanted to know how it feels.',
+    href: '/projects/ad-pki',
+    status: 'Running',
+    tone: 'chip-ok',
+    shot: '/shots/ad-certificate-authority.webp',
   },
   {
-    title: "Hardening a Kubernetes Cluster",
-    blurb: "Took a live k3s cluster from 'it works' to 'it's defended' — Trivy image scanning, RBAC, Pod Security, default-deny NetworkPolicy, and proving detection with a live attack watched in Wazuh.",
-    href: "/projects/k8s-security-hardening",
+    title: 'The Pipeline That Ships This Site',
+    blurb: 'Push a tag, GitHub Actions builds a hardened non-root container, pushes it to GHCR, and it rolls out to the cluster. About forty seconds, start to finish. You are looking at the output.',
+    href: '/projects/cicd-pipeline',
+    status: 'Automated',
+    tone: 'chip-acc',
+    shot: '/shots/cicd-github-actions.webp',
   },
   {
-    title: "Backups That Actually Restore",
-    blurb: "A two-layer disaster-recovery strategy — Velero for cluster state, Proxmox for VM disks — restore-tested by deliberately deleting things and bringing them back.",
-    href: "/projects/backup-dr",
+    title: 'System-Health Monitor',
+    blurb: 'A Bash health monitor with real thresholds, journalctl forensics, and Discord alerting on a systemd timer. It broke in production because sudo needed a TTY. That failure taught me more than the script did.',
+    href: '/projects/system-health',
+    status: 'Every 15 min',
+    tone: 'chip-ok',
+    shot: '/shots/grafana-site-uptime.webp',
   },
   {
-    title: "The Pipeline That Ships This Site",
-    blurb: "A GitHub Actions CI/CD pipeline that builds a hardened, non-root container image and publishes it to GHCR automatically on every version tag.",
-    href: "/projects/cicd-pipeline",
+    title: 'The Homelab',
+    blurb: 'Where all of it lives. A multi-VLAN Proxmox environment on a single Dell workstation — firewall, domain, storage, monitoring, and everything else, virtualized.',
+    href: '/projects/homelab',
+    status: 'Always on',
+    tone: 'chip-ok',
+    shot: '/shots/grafana-opnsense.webp',
   },
+];
+
+const STACK = [
+  { g: 'Virtualization',  i: 'Proxmox VE · KVM · GPU passthrough · TrueNAS · ZFS · NFS' },
+  { g: 'Containers',      i: 'Kubernetes (k3s) · Docker · containerd · Helm · GHCR' },
+  { g: 'Networking',      i: 'OPNsense · VLAN segmentation · Cloudflare Tunnel · Zero Trust · Tailscale · nginx' },
+  { g: 'Identity',        i: 'Active Directory · Group Policy · AD Certificate Services · PKI · Entra ID' },
+  { g: 'Observability',   i: 'Prometheus · Grafana · Loki · Alloy · Alertmanager · blackbox exporter' },
+  { g: 'Security',        i: 'Wazuh SIEM · Trivy · OpenVAS · nmap · RBAC · Pod Security · NetworkPolicy' },
+  { g: 'Automation',      i: 'Bash · systemd timers · GitHub Actions · Terraform · Git' },
+  { g: 'Operating systems', i: 'Ubuntu Server · Debian · Windows Server 2022 · Arch · Kali' },
 ];
 ---
 
 <Base>
-  <header class="mb-14">
-    <p class="seclabel mb-3">~/whoami<span class="blink"></span></p>
-    <h1 class="text-4xl font-bold tracking-tight">Steven <span class="glow">Garcia</span></h1>
-    <p class="text-zinc-400 mt-3" style="font-family:var(--mono);font-size:13.5px;color:var(--dim)">Navy Veteran · CIS Student · Homelab Engineer</p>
-  </header>
+  <!-- ===================================================== hero -->
+  <section class="shell hero">
+    <p class="hero-role">Infrastructure &amp; systems · San Antonio, Texas</p>
+    <h1>Steven Garcia</h1>
 
-  <section class="mb-14">
-    <h2 class="seclabel mb-4">// about</h2>
-    <p class="leading-relaxed" style="color:var(--ink)">
-      I'm Steven — transitioning into IT after a decade across Navy engineering, hospital technology, and state facility infrastructure. Currently studying Computer Information Systems at Southwest Texas College and running a multi-VLAN homelab where I learn the tools real teams run.
+    <p>
+      Seventeen virtual machines. Five VLANs. A three-node Kubernetes cluster with a
+      <strong>SIEM watching every one of them</strong> — running on a single server in my house.
     </p>
-    <p class="leading-relaxed mt-4" style="color:var(--ink)">
-      This site itself runs on my own infrastructure: Ubuntu + nginx, behind Cloudflare, monitored with Prometheus and Grafana.
+    <p>
+      I designed it, deployed it, broke it more times than I can count, fixed it, and wrote down
+      every failure along the way.
     </p>
-  </section>
 
-  <section class="mb-14">
-    <h2 class="seclabel mb-4">// projects</h2>
-    <ul class="space-y-3">
-      {projects.map((p) => (
-        <li>
-          <a href={p.href} class="proj-card block">
-            <h3 class="font-medium">
-              {p.title} <span class="arrow">→</span>
-            </h3>
-            <p class="text-sm mt-1">{p.blurb}</p>
-          </a>
-        </li>
+    <p class="hero-note">
+      Here is the honest part: I have not worked in IT yet. I am a Navy veteran finishing a
+      Computer Information Systems degree in May 2027, working nights in a hospital lab, and
+      teaching myself enterprise infrastructure the only way that has ever stuck for me — by
+      actually running it. No tutorials pasted in. No screenshots borrowed. Everything here is mine.
+    </p>
+
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/infrastructure">See the infrastructure</a>
+      <a class="btn btn-ghost" href="#work">Read the projects</a>
+      <a class="btn btn-ghost" href="/resume.pdf">Résumé (PDF)</a>
+    </div>
+
+    <div class="strip">
+      {METRICS.map((m) => (
+        <div class="strip-cell">
+          <span class="strip-n">{m.n}</span>
+          <span class="strip-l">{m.l}</span>
+        </div>
       ))}
-    </ul>
+    </div>
   </section>
 
-  <section class="mb-14">
-    <h2 class="seclabel mb-4">// elsewhere</h2>
-    <ul class="flex gap-3 flex-wrap">
-      {links.map((l) => (
-        <li>
-          <a href={l.href} class="chip" target="_blank" rel="noopener">{l.label}</a>
-        </li>
+  <!-- ==================================================== proof -->
+  <section class="shell section reveal" style="padding-bottom:0">
+    <div class="section-head">
+      <p class="eyebrow">Receipts</p>
+      <h2>Screenshots from my own systems.</h2>
+      <p class="lede">
+        Not stock images and not a tutorial someone else wrote. These are pulled straight out of
+        the environment described below, running right now.
+      </p>
+    </div>
+
+    <div class="proof">
+      <figure class="shot">
+        <img src="/shots/proxmox-datacenter.webp" alt="Proxmox datacenter summary showing 17 virtual machines, 88 CPUs and 125 GiB of RAM" loading="lazy" decoding="async" />
+        <figcaption><b>Proxmox.</b> Seventeen guests, 88 threads, 125&nbsp;GiB of RAM — one host, one standalone node.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="/shots/wazuh-agents.webp" alt="Wazuh agent_control listing five active agents across Windows and Linux" loading="lazy" decoding="async" />
+        <figcaption><b>Wazuh SIEM.</b> Five agents active across Windows and Linux, reporting to a manager running in Kubernetes.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="/shots/velero-backup-restore.webp" alt="Velero backup and restore listing showing nightly cluster backups and a completed restore drill" loading="lazy" decoding="async" />
+        <figcaption><b>Velero.</b> Nightly cluster backups, and a restore drill that completed in eleven seconds.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================================================= topology -->
+  <section class="shell section reveal">
+    <div class="section-head">
+      <p class="eyebrow">The environment</p>
+      <h2>This is not eight side projects. It is one system.</h2>
+      <p class="lede">
+        Traffic arrives through two Cloudflare Tunnels — no inbound ports are open on my network.
+        A virtualized firewall routes five segments and denies traffic between them by default.
+        Everything below it runs on one hypervisor.
+      </p>
+    </div>
+
+    <figure class="figure">
+      <Fragment set:html={topology} />
+      <figcaption>
+        The offensive-security segment cannot reach the servers. I did not assume that — I put a
+        scanner in the DMZ, pointed it at my cluster, and watched it come back with nothing.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ==================================================== work -->
+  <section class="shell section reveal" id="work">
+    <div class="section-head">
+      <p class="eyebrow">Write-ups</p>
+      <h2>Every project includes what went wrong.</h2>
+      <p class="lede">
+        Anyone can post a build that worked. The useful part is the failure, the diagnosis, and the
+        fix — so that is what these are about.
+      </p>
+    </div>
+
+    <div class="grid">
+      {PROJECTS.map((p) => (
+        <a class={p.feature ? 'card card-feature' : 'card'} href={p.href}>
+          {p.shot && (
+            <div class="card-shot">
+              <img src={p.shot} alt="" loading="lazy" decoding="async" width="1600" height="700" />
+            </div>
+          )}
+          <div class="card-top">
+            <h3>{p.title}</h3>
+            <span class={`chip ${p.tone}`}>{p.status}</span>
+          </div>
+          <p>{p.blurb}</p>
+          <span class="card-go">Read the write-up &rarr;</span>
+        </a>
       ))}
-    </ul>
+    </div>
   </section>
 
-  <footer class="foot mt-24">
-    <span class="accent">$</span> self-hosted on a homelab in uvalde, tx
-  </footer>
+  <!-- =================================================== stack -->
+  <section class="shell section reveal">
+    <div class="section-head">
+      <p class="eyebrow">Hands-on with</p>
+      <h2>Tools I have actually run, not just read about.</h2>
+      <p class="lede">
+        Everything listed here is deployed and running in the environment above, or was used to
+        build and test it.
+      </p>
+    </div>
+
+    <div>
+      {STACK.map((s) => (
+        <div class="stack-group">
+          <h3>{s.g}</h3>
+          <p class="stack-list">{s.i}</p>
+        </div>
+      ))}
+      <hr class="rule" />
+    </div>
+  </section>
+
+  <!-- =================================================== close -->
+  <section class="shell section reveal">
+    <div class="section-head" style="margin-bottom:1.5rem">
+      <p class="eyebrow">Where I am headed</p>
+      <h2>Still learning. That is the whole point.</h2>
+      <p class="lede">
+        I am not going to tell you I have production experience, because I do not. What I can tell
+        you is that when something breaks at 2am in my lab, nobody else is coming to fix it — and
+        it always gets fixed. I am looking for a first IT role in the San Antonio area where I can
+        do that work for a team.
+      </p>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="mailto:contact@steven-garcia.dev">Get in touch</a>
+      <a class="btn btn-ghost" href="/resume.pdf">Résumé (PDF)</a>
+    </div>
+  </section>
 </Base>

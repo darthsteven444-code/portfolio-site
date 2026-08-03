@@ -1,0 +1,226 @@
+---
+// src/pages/infrastructure.astro
+import Base from '../layouts/Base.astro';
+import topology from '../assets/homelab-topology.svg?raw';
+
+const STATS = [
+  { n: '17',   l: 'virtual machines' },
+  { n: '5',    l: 'VLAN segments' },
+  { n: '63',   l: 'pods running' },
+  { n: '9',    l: 'k8s namespaces' },
+  { n: '5',    l: 'SIEM agents' },
+  { n: '7',    l: 'nightly backups' },
+];
+
+const LAYERS = [
+  {
+    name: 'Compute & virtualization',
+    chip: 'Proxmox VE',
+    tone: 'chip-ok',
+    body: 'One Dell T7910 runs all seventeen guests — Linux servers, a Windows domain controller, three Kubernetes nodes, a NAS, and the firewall itself. That last one is worth sitting with: OPNsense is a virtual machine. My entire network lives inside a box I could carry out the front door.',
+    href: '/projects/homelab',
+    cta: 'How the lab is built',
+  },
+  {
+    name: 'Network & segmentation',
+    chip: 'Default deny',
+    tone: 'chip-sig',
+    body: 'OPNsense routes five VLANs and blocks traffic between them by default. The offensive-security segment cannot reach the servers — and I did not take my own word for it. I put a Kali box in the DMZ, pointed a vulnerability scanner at my cluster, and watched it find absolutely nothing. That is what a working control looks like.',
+    href: '/projects/k8s-security-hardening',
+    cta: 'How segmentation was proven',
+  },
+  {
+    name: 'Identity & certificates',
+    chip: 'lab.local',
+    tone: 'chip-acc',
+    body: 'A Windows Server domain with organizational units for servers, workstations, users, and students, plus an internal certificate authority issuing real certificates from custom templates. Most people never touch AD Certificate Services. I built a root CA and issued certs to a domain controller and a web server because I wanted to know what PKI actually feels like.',
+    href: '/projects/ad-pki',
+    cta: 'Active Directory and PKI',
+  },
+  {
+    name: 'Monitoring & logs',
+    chip: 'Every 15s',
+    tone: 'chip-ok',
+    body: 'Prometheus scrapes it all, Grafana draws it, Alertmanager pages me on Discord, and Loki centralizes logs from all nine Kubernetes namespaces. A blackbox exporter probes this very page from outside and tracks the SSL expiry. One question drives the whole layer: do I find out before a user would?',
+    href: '/projects/system-health',
+    cta: 'The monitoring stack',
+  },
+  {
+    name: 'Security operations',
+    chip: 'Wazuh SIEM',
+    tone: 'chip-sig',
+    body: 'A full Wazuh deployment runs inside the same Kubernetes cluster it monitors — manager, worker, indexer, dashboard — with five agents reporting across Windows and Linux. Trivy scans every image continuously. Five namespaces enforce default-deny ingress. When I brute-forced my own infrastructure, Wazuh caught it live and tagged the alerts against PCI, HIPAA, NIST, and GDPR.',
+    href: '/projects/k8s-security-hardening',
+    cta: 'Attack, detect, remediate',
+  },
+  {
+    name: 'Backup & recovery',
+    chip: 'Restore-tested',
+    tone: 'chip-ok',
+    body: 'Velero backs the cluster up nightly with seven-day retention; Proxmox takes full VM backups to the NAS. Both have been restore-tested — the Kubernetes drill came back in eleven seconds. Anybody can run backups. Restoring them is the part that counts, and the only way to know is to actually do it.',
+    href: '/projects/backup-dr',
+    cta: 'Backups and restore drills',
+  },
+  {
+    name: 'Delivery pipeline',
+    chip: '~40s builds',
+    tone: 'chip-acc',
+    body: 'You are reading the output of this pipeline right now. Push a git tag, GitHub Actions builds a hardened non-root container, pushes it to GHCR, and it rolls out to the cluster behind a Cloudflare Tunnel. No inbound ports are open on my network — the tunnel dials outward.',
+    href: '/projects/cicd-pipeline',
+    cta: 'The CI/CD pipeline',
+  },
+];
+
+const EVIDENCE = [
+  { src: '/shots/proxmox-vm-list.webp', title: 'Proxmox guest list.',
+    alt: 'Proxmox server view listing seventeen virtual machines',
+    cap: 'All seventeen VMs — firewall, domain controller, Kubernetes nodes, storage, and the demo estate.' },
+  { src: '/shots/opnsense-dmz-rules.webp', title: 'OPNsense DMZ rules.',
+    alt: 'OPNsense firewall rules for the DMZ interface showing a block to internal networks',
+    cap: 'The rule that stops the offensive-security segment from reaching anything internal.' },
+  { src: '/shots/kubectl-nodes.webp', title: 'The cluster.',
+    alt: 'kubectl get nodes output showing three Ready k3s nodes',
+    cap: 'Three nodes, Ubuntu 24.04, k3s v1.36.2 — 63 pods across 9 namespaces.' },
+  { src: '/shots/wazuh-pods-services.webp', title: 'SIEM on Kubernetes.',
+    alt: 'kubectl output showing Wazuh manager, worker, indexer and dashboard pods',
+    cap: 'Manager, worker, indexer and dashboard — my SIEM runs on the cluster it monitors.' },
+  { src: '/shots/kubectl-networkpolicy.webp', title: 'Default deny.',
+    alt: 'kubectl get networkpolicy across all namespaces',
+    cap: 'Ingress denied by default across five namespaces unless explicitly allowed.' },
+  { src: '/shots/trivy-vulnerability-reports.webp', title: 'Continuous image scanning.',
+    alt: 'Trivy operator vulnerability reports across all namespaces',
+    cap: 'Trivy scans every running image, including the one serving this page.' },
+  { src: '/shots/velero-backup-restore.webp', title: 'Backups and a real restore.',
+    alt: 'Velero backup list and a completed restore drill',
+    cap: 'Seven nightly backups retained, and a restore drill that finished in eleven seconds.' },
+  { src: '/shots/truenas-storage.webp', title: 'Storage.',
+    alt: 'TrueNAS dashboard showing pool status and capacity',
+    cap: 'A ZFS pool with four disks, zero errors, and 5.5 TiB free.' },
+  { src: '/shots/grafana-site-uptime.webp', title: 'This page, monitored.',
+    alt: 'Grafana dashboard probing steven-garcia.dev for uptime, latency and certificate expiry',
+    cap: 'Blackbox probes hitting this site every fifteen seconds, tracking latency and cert expiry.' },
+  { src: '/shots/grafana-loki-logs.webp', title: 'Centralized logs.',
+    alt: 'Grafana Explore showing Loki logs from Kubernetes pods',
+    cap: 'Every pod in every namespace shipping logs to Loki.' },
+  { src: '/shots/grafana-opnsense.webp', title: 'Firewall telemetry.',
+    alt: 'Grafana dashboard showing OPNsense per-VLAN traffic',
+    cap: 'Per-VLAN throughput, packet counts, and system health off the firewall itself.' },
+  { src: '/shots/grafana-windows-dc01.webp', title: 'Windows monitoring.',
+    alt: 'Grafana Windows exporter dashboard for the domain controller',
+    cap: 'The domain controller exporting metrics alongside the Linux fleet.' },
+  { src: '/shots/ad-users-and-computers.webp', title: 'Active Directory.',
+    alt: 'Active Directory Users and Computers showing the lab.local organizational unit tree',
+    cap: 'lab.local with purpose-built OUs for servers, workstations, users, and students.' },
+  { src: '/shots/ad-certificate-authority.webp', title: 'Internal PKI.',
+    alt: 'Certification Authority console showing issued certificates',
+    cap: 'A root CA issuing real certificates from templates to the DC and internal services.' },
+  { src: '/shots/glpi-service-desk.webp', title: 'Service desk.',
+    alt: 'GLPI ticket queue showing hospital-style tickets',
+    cap: 'A working GLPI queue with realistic hospital tickets, published through Zero Trust.' },
+  { src: '/shots/cloudflare-tunnels.webp', title: 'Zero inbound ports.',
+    alt: 'Cloudflare tunnel dashboard showing two healthy tunnels',
+    cap: 'Two healthy tunnels dialing outward. Nothing on my network listens to the internet.' },
+  { src: '/shots/cloudflare-zero-trust-apps.webp', title: 'Identity-gated demos.',
+    alt: 'Cloudflare Zero Trust applications list showing browser RDP demos',
+    cap: 'Browser-based RDP into lab machines, gated behind an Access policy.' },
+  { src: '/shots/cicd-github-actions.webp', title: 'The pipeline.',
+    alt: 'GitHub Actions workflow runs, all successful',
+    cap: 'Tag, build, push, deploy. Every run green, about forty seconds each.' },
+];
+---
+
+<Base
+  title="Infrastructure Overview"
+  description="17 VMs, 5 VLANs, a Kubernetes cluster, a SIEM, and restore-tested backups — the full architecture of my homelab and how every project fits into one system."
+>
+  <section class="shell hero" style="padding-bottom:1rem">
+    <p class="hero-role">Infrastructure overview</p>
+    <h1 style="font-size:clamp(2.1rem,6vw,3.6rem)">One environment.<br />Not eight side projects.</h1>
+    <p style="margin-top:1.4rem">
+      Every write-up on this site documents a piece of the same system. This page is the map — what
+      runs where, how the segments are separated, and how it all connects. Each layer links to the
+      deep dive that explains why I built it that way, including everything I broke getting there.
+    </p>
+
+    <div class="strip">
+      {STATS.map((s) => (
+        <div class="strip-cell">
+          <span class="strip-n">{s.n}</span>
+          <span class="strip-l">{s.l}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell section reveal" style="padding-top:2.5rem">
+    <div class="section-head">
+      <p class="eyebrow">Topology</p>
+      <h2>How traffic actually reaches me.</h2>
+      <p class="lede">
+        Two Cloudflare Tunnels dial outward, so nothing is exposed inbound. A virtualized OPNsense
+        firewall handles routing and enforces every boundary between segments.
+      </p>
+    </div>
+
+    <figure class="figure">
+      <Fragment set:html={topology} />
+      <figcaption>
+        The offensive-security segment is firewalled off from the servers. Confirmed by scanning
+        across the boundary and watching the traffic die.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="shell section reveal">
+    <div class="section-head">
+      <p class="eyebrow">The layers</p>
+      <h2>Seven systems, one stack.</h2>
+    </div>
+
+    <div class="grid">
+      {LAYERS.map((layer) => (
+        <a class="card" href={layer.href}>
+          <div class="card-top">
+            <h3>{layer.name}</h3>
+            <span class={`chip ${layer.tone}`}>{layer.chip}</span>
+          </div>
+          <p>{layer.body}</p>
+          <span class="card-go">{layer.cta} &rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+
+  <section class="shell section reveal">
+    <div class="section-head">
+      <p class="eyebrow">Evidence</p>
+      <h2>Every claim above, screenshotted.</h2>
+      <p class="lede">
+        Pulled from the live environment. Private addresses are shown deliberately — they are not
+        routable from the internet, and hiding them would make this less verifiable, not more secure.
+      </p>
+    </div>
+
+    <div class="shot-grid">
+      {EVIDENCE.map((e) => (
+        <figure class="shot">
+          <img src={e.src} alt={e.alt} loading="lazy" decoding="async" />
+          <figcaption><b>{e.title}</b> {e.cap}</figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell section reveal" style="padding-top:0">
+    <div class="hire">
+      <p class="eyebrow">Honest scope</p>
+      <p style="margin:0;color:var(--muted);max-width:68ch">
+        I designed, deployed, broke, repaired, and documented every piece of this myself, on
+        hardware I paid for. It is a lab, not a production environment, and I am not going to
+        pretend otherwise. But the architecture is real, the failures were real, and I wrote all of
+        them down.
+      </p>
+    </div>
+  </section>
+</Base>

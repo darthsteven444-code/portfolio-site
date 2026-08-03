@@ -1,0 +1,94 @@
+---
+// src/components/ProjectSummary.astro
+// The five-second read. No self-rated "difficulty" field — rating your own
+// project difficulty is unverifiable and reads as self-promotion.
+
+interface Props {
+  status?: string;
+  duration?: string;
+  stack?: string[];
+  outcome?: string;
+  skills?: string[];
+}
+
+const { status, duration, stack = [], outcome, skills = [] } = Astro.props;
+
+const facts = [
+  duration && { t: 'Duration', v: duration },
+  status   && { t: 'Status',   v: status },
+].filter(Boolean) as { t: string; v: string }[];
+
+const has = facts.length || stack.length || outcome || skills.length;
+---
+
+{has && (
+  <section class="summary" aria-label="Project summary">
+    <p class="eyebrow" style="margin-bottom:1.1rem">Summary</p>
+
+    {facts.length > 0 && (
+      <dl class="summary-facts">
+        {facts.map((f) => (
+          <div>
+            <dt>{f.t}</dt>
+            <dd>{f.v}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+
+    {stack.length > 0 && (
+      <div class="summary-block">
+        <p class="summary-label">Built with</p>
+        <div class="chip-row">
+          {stack.map((s) => <span class="chip chip-acc">{s}</span>)}
+        </div>
+      </div>
+    )}
+
+    {outcome && (
+      <div class="summary-block">
+        <p class="summary-label">Outcome</p>
+        <p class="summary-outcome">{outcome}</p>
+      </div>
+    )}
+
+    {skills.length > 0 && (
+      <div class="summary-block summary-skills">
+        <p class="summary-label">Skills demonstrated</p>
+        <p class="summary-list">{skills.join(' · ')}</p>
+      </div>
+    )}
+  </section>
+)}
+
+<style>
+  .summary {
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: var(--r);
+    background: var(--surface);
+    padding: 1.4rem 1.5rem;
+    margin: 2rem 0 2.6rem;
+  }
+  .summary-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 2.6rem;
+    margin: 0 0 1.3rem;
+  }
+  .summary-facts dt,
+  .summary-label {
+    font-family: var(--mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 0 0 0.35rem;
+  }
+  .summary-facts dd { margin: 0; font-size: 0.94rem; color: var(--text); }
+  .summary-block { margin-bottom: 1.3rem; }
+  .summary-block:last-child { margin-bottom: 0; }
+  .summary-outcome { margin: 0; font-size: 0.94rem; color: var(--text); line-height: 1.65; }
+  .summary-skills { border-top: 1px solid var(--border); padding-top: 1.2rem; }
+  .summary-list { margin: 0; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); line-height: 1.9; }
+</style>

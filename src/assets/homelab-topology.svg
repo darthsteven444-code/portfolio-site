@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 780" role="img"
+     aria-labelledby="topo-title topo-desc" preserveAspectRatio="xMidYMid meet">
+  <title id="topo-title">Homelab network topology</title>
+  <desc id="topo-desc">Two Cloudflare tunnels reach the lab with no inbound ports open. OPNsense,
+    itself a virtual machine, routes and segments five VLANs. Seventeen guests run on a single
+    Proxmox hypervisor. The DMZ segment is firewalled from the server segment.</desc>
+
+  <style>
+    .lane      { fill: #0d1512; stroke: #1f3a2c; stroke-width: 1; }
+    .lane-dmz  { fill: #16100c; stroke: #4a3520; stroke-width: 1; }
+    .lane-lbl  { font: 600 11px 'JetBrains Mono', ui-monospace, monospace; fill: #6b8f7d;
+                 letter-spacing: .12em; }
+    .node      { fill: #101c17; stroke: #39ff8b; stroke-width: 1.25; rx: 3; }
+    .node-dmz  { fill: #1a1209; stroke: #ffb43a; stroke-width: 1.25; rx: 3; }
+    .node-edge { fill: #0e1a22; stroke: #4ac2ff; stroke-width: 1.25; rx: 3; }
+    .name      { font: 600 12.5px 'JetBrains Mono', ui-monospace, monospace; fill: #d6ffe9; }
+    .meta      { font: 400 10px 'JetBrains Mono', ui-monospace, monospace; fill: #7fae97; }
+    .meta-dmz  { font: 400 10px 'JetBrains Mono', ui-monospace, monospace; fill: #c99a5a; }
+    .meta-edge { font: 400 10px 'JetBrains Mono', ui-monospace, monospace; fill: #7fb8d6; }
+    .meta-dim  { font: 400 10px 'JetBrains Mono', ui-monospace, monospace; fill: #5f8471; }
+    .link-edge { stroke: #2a6d8f; stroke-width: 1.5; fill: none; }
+    .link      { stroke: #2f6b4d; stroke-width: 1.5; fill: none; }
+    .blocked   { stroke: #ff5f56; stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+    .blk-lbl   { font: 600 10px 'JetBrains Mono', ui-monospace, monospace; fill: #ff8078; }
+    .group     { fill: none; stroke: #1f7a4a; stroke-width: 1; stroke-dasharray: 3 3; rx: 4; }
+    .group-lbl { font: 600 9.5px 'JetBrains Mono', ui-monospace, monospace; fill: #39ff8b;
+                 letter-spacing: .1em; }
+    .host      { fill: #0b1210; stroke: #2b5c44; stroke-width: 1; rx: 3; }
+    .host-name { font: 600 12px 'JetBrains Mono', ui-monospace, monospace; fill: #9fe8c2; }
+  </style>
+
+  <defs>
+    <marker id="arw" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#2f6b4d"/>
+    </marker>
+    <marker id="arw-e" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#2a6d8f"/>
+    </marker>
+  </defs>
+
+  <rect class="node-edge" x="404" y="12" width="192" height="38"/>
+  <text class="name"      x="500" y="29" text-anchor="middle">Internet</text>
+  <text class="meta-edge" x="500" y="43" text-anchor="middle">no inbound ports open</text>
+
+  <path class="link-edge" d="M500,50 L500,74" marker-end="url(#arw-e)"/>
+
+  <rect class="node-edge" x="196" y="76" width="290" height="52"/>
+  <text class="name"      x="212" y="95">tunnel: steven-garcia-prod</text>
+  <text class="meta-edge" x="212" y="110">HEALTHY · 2 apps</text>
+  <text class="meta-edge" x="212" y="122">portfolio + www</text>
+
+  <rect class="node-edge" x="514" y="76" width="290" height="52"/>
+  <text class="name"      x="530" y="95">tunnel: demo-helpdesk</text>
+  <text class="meta-edge" x="530" y="110">HEALTHY · Zero Trust Access</text>
+  <text class="meta-edge" x="530" y="122">browser RDP to DC + Win11 demos</text>
+
+  <path class="link-edge" d="M341,128 L341,146 L500,146 L500,166" marker-end="url(#arw-e)"/>
+  <path class="link-edge" d="M659,128 L659,146 L500,146"/>
+
+  <rect class="node" x="190" y="168" width="620" height="50"/>
+  <text class="name" x="500" y="187" text-anchor="middle">OPNsense (VM 102 · FW01) — routing, firewall, VLAN segmentation</text>
+  <text class="meta" x="500" y="205" text-anchor="middle">the firewall is itself virtualized · 5 VLANs · default-deny between segments</text>
+
+  <path class="link" d="M500,218 L500,244" marker-end="url(#arw)"/>
+
+  <rect class="lane" x="40" y="246" width="920" height="182"/>
+  <text class="lane-lbl" x="56" y="266">VLAN 20 — SERVERS · 192.168.20.0/24</text>
+
+  <rect class="group" x="60" y="278" width="300" height="132"/>
+  <text class="group-lbl" x="74" y="294">K3S CLUSTER · v1.36.2 · 63 PODS</text>
+
+  <rect class="node" x="76" y="304" width="268" height="28"/>
+  <text class="host-name" x="88" y="323">k3s-1</text>
+  <text class="meta"      x="332" y="323" text-anchor="end">.41 · control-plane</text>
+
+  <rect class="node" x="76" y="338" width="268" height="28"/>
+  <text class="host-name" x="88" y="357">k3s-2</text>
+  <text class="meta"      x="332" y="357" text-anchor="end">192.168.20.42</text>
+
+  <rect class="node" x="76" y="372" width="268" height="28"/>
+  <text class="host-name" x="88" y="391">k3s-3</text>
+  <text class="meta"      x="332" y="391" text-anchor="end">192.168.20.43</text>
+
+  <rect class="node" x="380" y="296" width="272" height="38"/>
+  <text class="host-name" x="392" y="312">linux-lab</text>
+  <text class="meta"      x="392" y="326">jump host · kubectl · cloudflared · .30</text>
+
+  <rect class="node" x="380" y="342" width="272" height="38"/>
+  <text class="host-name" x="392" y="358">WebServer</text>
+  <text class="meta"      x="392" y="372">Prometheus · Grafana · Loki · .20</text>
+
+  <rect class="node" x="668" y="296" width="272" height="38"/>
+  <text class="host-name" x="680" y="312">TrueNAS</text>
+  <text class="meta"      x="680" y="326">10.4 TiB · NFS + S3 · .50</text>
+
+  <rect class="node" x="668" y="342" width="130" height="38"/>
+  <text class="host-name" x="680" y="358">DC01</text>
+  <text class="meta"      x="680" y="372">AD · CA · .10</text>
+
+  <rect class="node" x="810" y="342" width="130" height="38"/>
+  <text class="host-name" x="822" y="358">AI01</text>
+  <text class="meta"      x="822" y="372">Ollama</text>
+
+  <text class="meta-dim" x="380" y="401">also: Win11, DC-DEMO, WIN11-DEMO, GLPI-DEMO — the reviewer demo estate</text>
+
+  <rect class="lane-dmz" x="40" y="444" width="920" height="94"/>
+  <text class="lane-lbl" x="56" y="464">VLAN 40 — DMZ / OFFENSIVE · 192.168.40.0/24</text>
+
+  <rect class="node-dmz" x="76" y="474" width="268" height="44"/>
+  <text class="host-name" x="88" y="492">Kali (VM 105)</text>
+  <text class="meta-dmz"  x="88" y="508">OpenVAS · nmap · hydra · .40.50</text>
+
+  <rect class="node-dmz" x="380" y="474" width="272" height="44"/>
+  <text class="host-name" x="392" y="492">Metasploitable (VM 109)</text>
+  <text class="meta-dmz"  x="392" y="508">intentionally vulnerable target</text>
+
+  <path class="blocked" d="M700,474 L700,428"/>
+  <line x1="690" y1="458" x2="710" y2="438" stroke="#ff5f56" stroke-width="2"/>
+  <line x1="690" y1="438" x2="710" y2="458" stroke="#ff5f56" stroke-width="2"/>
+  <text class="blk-lbl" x="722" y="454">VLAN 40 to VLAN 20 BLOCKED</text>
+  <text class="meta"    x="722" y="468">proven: scan from the DMZ reached nothing</text>
+
+  <rect class="lane" x="40" y="554" width="452" height="76"/>
+  <text class="lane-lbl" x="56" y="574">VLAN 1 — LAN</text>
+  <rect class="node" x="60" y="582" width="200" height="32"/>
+  <text class="host-name" x="72" y="602">CasaOS</text>
+  <text class="meta"      x="248" y="602" text-anchor="end">media</text>
+  <rect class="node" x="272" y="582" width="200" height="32"/>
+  <text class="host-name" x="284" y="602">Proxmox mgmt</text>
+  <text class="meta"      x="460" y="602" text-anchor="end">192.168.1.2</text>
+
+  <rect class="lane" x="508" y="554" width="452" height="76"/>
+  <text class="lane-lbl" x="524" y="574">VLAN 10 — MGMT · VLAN 30 — CLIENTS</text>
+  <text class="meta"     x="524" y="596">out-of-band administration and workstation</text>
+  <text class="meta"     x="524" y="612">segments, isolated by firewall policy</text>
+
+  <rect class="host" x="40" y="646" width="920" height="60"/>
+  <text class="host-name" x="60" y="668">Proxmox VE — one hypervisor, 17 guests</text>
+  <text class="meta"      x="60" y="686">Dell T7910 · dual Xeon E5-2699 v4 · 88 threads · 125.78 GiB RAM · 6.37 TiB local</text>
+
+  <text class="meta-dim" x="500" y="734" text-anchor="middle">Every box above — including the firewall — is a virtual machine on this one host.</text>
+  <text class="meta-dim" x="500" y="752" text-anchor="middle">Wazuh, Prometheus, Loki and Velero watch and back up the whole thing from inside it.</text>
+</svg>
