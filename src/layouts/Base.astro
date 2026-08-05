@@ -74,7 +74,14 @@ const desc = description ?? 'Navy veteran and CIS student running a 17-VM homela
           </div>
         </div>
       </footer>
+
+      <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+        <span class="lb-hint">esc or click to close</span>
+        <img id="lb-img" src="" alt="" />
+        <p class="lb-cap" id="lb-cap"></p>
+      </div>
     </div>
+
 
     <script is:inline>
       (function () {
@@ -90,6 +97,38 @@ const desc = description ?? 'Navy veteran and CIS student running a 17-VM homela
           });
         }, { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
         items.forEach(function (el) { io.observe(el); });
+      })();
+    </script>
+
+    <script is:inline>
+      (function () {
+        var lb = document.getElementById('lb');
+        if (!lb) return;
+        var img = document.getElementById('lb-img');
+        var cap = document.getElementById('lb-cap');
+        function open(src, alt, text) {
+          img.src = src; img.alt = alt || '';
+          cap.textContent = text || alt || '';
+          lb.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        }
+        function close() {
+          lb.classList.remove('open');
+          document.body.style.overflow = '';
+          img.src = '';
+        }
+        document.querySelectorAll('.shot img, .card-shot img').forEach(function (el) {
+          el.addEventListener('click', function (e) {
+            e.preventDefault();
+            var fig = el.closest('figure');
+            var c = fig ? fig.querySelector('figcaption') : null;
+            open(el.getAttribute('src'), el.getAttribute('alt'), c ? c.textContent.trim() : '');
+          });
+        });
+        lb.addEventListener('click', close);
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') close();
+        });
       })();
     </script>
   </body>
