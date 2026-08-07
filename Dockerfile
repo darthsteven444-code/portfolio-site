@@ -1,5 +1,5 @@
 # ---- Stage 1: build ----
-FROM node:22-alpine AS build
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 RUN apk upgrade --no-cache
 WORKDIR /app
 COPY package*.json ./
