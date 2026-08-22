@@ -1,46 +1,44 @@
 ---
-// src/pages/infrastructure.astro
-import Base from '../layouts/Base.astro';
 import topology from '../assets/homelab-topology.svg?raw';
 
 const STATS = [
-  { n: '17',   l: 'virtual machines' },
-  { n: '5',    l: 'VLAN segments' },
-  { n: '63',   l: 'pods running' },
-  { n: '9',    l: 'k8s namespaces' },
-  { n: '5',    l: 'SIEM agents' },
-  { n: '7',    l: 'nightly backups' },
+  { n: '17', l: 'virtual machines' },
+  { n: '5',  l: 'VLAN segments' },
+  { n: '63', l: 'pods running' },
+  { n: '9',  l: 'k8s namespaces' },
+  { n: '7',  l: 'SIEM agents' },
+  { n: '7',  l: 'nightly backups' },
 ];
 
 const LAYERS = [
   {
-    name: 'Compute & virtualization',
+    name: 'Compute and virtualization',
     chip: 'Proxmox VE',
-    tone: 'chip-ok',
-    body: 'One Dell T7910 runs all seventeen guests — Linux servers, a Windows domain controller, three Kubernetes nodes, a NAS, and the firewall itself. That last one is worth sitting with: OPNsense is a virtual machine. My entire network lives inside a box I could carry out the front door.',
+    tone: 'ok',
+    body: 'One Dell T7910 runs all seventeen guests. Linux servers, a Windows domain controller, three Kubernetes nodes, a NAS, and the firewall itself. That last one is worth sitting with: OPNsense is a virtual machine. My entire network lives inside a box I could carry out the front door.',
     href: '/projects/homelab',
     cta: 'How the lab is built',
   },
   {
-    name: 'Network & segmentation',
+    name: 'Network and segmentation',
     chip: 'Default deny',
-    tone: 'chip-sig',
-    body: 'OPNsense routes five VLANs and blocks traffic between them by default. The offensive-security segment cannot reach the servers — and I did not take my own word for it. I put a Kali box in the DMZ, pointed a vulnerability scanner at my cluster, and watched it find absolutely nothing. That is what a working control looks like.',
-    href: '/projects/k8s-security-hardening',
+    tone: 'steel',
+    body: 'OPNsense routes five VLANs and blocks traffic between them by default. The offensive security segment cannot reach the servers, and I did not take my own word for it. I put a Kali box in the DMZ, pointed a vulnerability scanner at my cluster, and watched it find absolutely nothing. That is what a working control looks like.',
+    href: '/projects/vulnerability-management',
     cta: 'How segmentation was proven',
   },
   {
-    name: 'Identity & certificates',
+    name: 'Identity and certificates',
     chip: 'lab.local',
-    tone: 'chip-acc',
+    tone: 'ox',
     body: 'A Windows Server domain with organizational units for servers, workstations, users, and students, plus an internal certificate authority issuing real certificates from custom templates. Most people never touch AD Certificate Services. I built a root CA and issued certs to a domain controller and a web server because I wanted to know what PKI actually feels like.',
     href: '/projects/ad-pki',
     cta: 'Active Directory and PKI',
   },
   {
-    name: 'Monitoring & logs',
+    name: 'Monitoring and logs',
     chip: 'Every 15s',
-    tone: 'chip-ok',
+    tone: 'ok',
     body: 'Prometheus scrapes it all, Grafana draws it, Alertmanager pages me on Discord, and Loki centralizes logs from all nine Kubernetes namespaces. A blackbox exporter probes this very page from outside and tracks the SSL expiry. One question drives the whole layer: do I find out before a user would?',
     href: '/projects/system-health',
     cta: 'The monitoring stack',
@@ -48,179 +46,265 @@ const LAYERS = [
   {
     name: 'Security operations',
     chip: 'Wazuh SIEM',
-    tone: 'chip-sig',
-    body: 'A full Wazuh deployment runs inside the same Kubernetes cluster it monitors — manager, worker, indexer, dashboard — with five agents reporting across Windows and Linux. Trivy scans every image continuously. Five namespaces enforce default-deny ingress. When I brute-forced my own infrastructure, Wazuh caught it live and tagged the alerts against PCI, HIPAA, NIST, and GDPR.',
+    tone: 'steel',
+    body: 'A full Wazuh deployment runs inside the same Kubernetes cluster it monitors. Manager, worker, indexer, dashboard, with agents reporting across Windows, Linux, and two clouds. Trivy scans every image continuously. Five namespaces enforce default deny ingress. When I brute forced my own infrastructure, Wazuh caught it live and tagged the alerts against PCI, HIPAA, NIST, and GDPR.',
     href: '/projects/k8s-security-hardening',
     cta: 'Attack, detect, remediate',
   },
   {
-    name: 'Backup & recovery',
-    chip: 'Restore-tested',
-    tone: 'chip-ok',
-    body: 'Velero backs the cluster up nightly with seven-day retention; Proxmox takes full VM backups to the NAS. Both have been restore-tested — the Kubernetes drill came back in eleven seconds. Anybody can run backups. Restoring them is the part that counts, and the only way to know is to actually do it.',
+    name: 'Backup and recovery',
+    chip: 'Restore tested',
+    tone: 'ok',
+    body: 'Velero backs the cluster up nightly with seven day retention. Proxmox takes full VM backups to the NAS. Both have been restore tested, and the Kubernetes drill came back in eleven seconds. Anybody can run backups. Restoring them is the part that counts, and the only way to know is to actually do it.',
     href: '/projects/backup-dr',
     cta: 'Backups and restore drills',
   },
   {
     name: 'Delivery pipeline',
-    chip: '~40s builds',
-    tone: 'chip-acc',
-    body: 'You are reading the output of this pipeline right now. Push a git tag, GitHub Actions builds a hardened non-root container, pushes it to GHCR, and it rolls out to the cluster behind a Cloudflare Tunnel. No inbound ports are open on my network — the tunnel dials outward.',
+    chip: '40s builds',
+    tone: 'ox',
+    body: 'You are reading the output of this pipeline right now. Push a git tag, GitHub Actions builds a hardened non root container, pushes it to GHCR, and it rolls out to the cluster behind a Cloudflare Tunnel. No inbound ports are open on my network. The tunnel dials outward.',
     href: '/projects/cicd-pipeline',
     cta: 'The CI/CD pipeline',
   },
 ];
 
 const EVIDENCE = [
-  { src: '/shots/proxmox-vm-list.webp', title: 'Proxmox guest list.',
-    alt: 'Proxmox server view listing seventeen virtual machines',
-    cap: 'All seventeen VMs — firewall, domain controller, Kubernetes nodes, storage, and the demo estate.' },
-  { src: '/shots/opnsense-dmz-rules.webp', title: 'OPNsense DMZ rules.',
-    alt: 'OPNsense firewall rules for the DMZ interface showing a block to internal networks',
-    cap: 'The rule that stops the offensive-security segment from reaching anything internal.' },
-  { src: '/shots/kubectl-nodes.webp', title: 'The cluster.',
-    alt: 'kubectl get nodes output showing three Ready k3s nodes',
-    cap: 'Three nodes, Ubuntu 24.04, k3s v1.36.2 — 63 pods across 9 namespaces.' },
-  { src: '/shots/wazuh-pods-services.webp', title: 'SIEM on Kubernetes.',
-    alt: 'kubectl output showing Wazuh manager, worker, indexer and dashboard pods',
-    cap: 'Manager, worker, indexer and dashboard — my SIEM runs on the cluster it monitors.' },
-  { src: '/shots/kubectl-networkpolicy.webp', title: 'Default deny.',
-    alt: 'kubectl get networkpolicy across all namespaces',
-    cap: 'Ingress denied by default across five namespaces unless explicitly allowed.' },
-  { src: '/shots/trivy-vulnerability-reports.webp', title: 'Continuous image scanning.',
-    alt: 'Trivy operator vulnerability reports across all namespaces',
-    cap: 'Trivy scans every running image, including the one serving this page.' },
-  { src: '/shots/velero-backup-restore.webp', title: 'Backups and a real restore.',
-    alt: 'Velero backup list and a completed restore drill',
-    cap: 'Seven nightly backups retained, and a restore drill that finished in eleven seconds.' },
-  { src: '/shots/truenas-storage.webp', title: 'Storage.',
-    alt: 'TrueNAS dashboard showing pool status and capacity',
-    cap: 'A ZFS pool with four disks, zero errors, and 5.5 TiB free.' },
-  { src: '/shots/grafana-site-uptime.webp', title: 'This page, monitored.',
-    alt: 'Grafana dashboard probing steven-garcia.dev for uptime, latency and certificate expiry',
-    cap: 'Blackbox probes hitting this site every fifteen seconds, tracking latency and cert expiry.' },
-  { src: '/shots/grafana-loki-logs.webp', title: 'Centralized logs.',
-    alt: 'Grafana Explore showing Loki logs from Kubernetes pods',
-    cap: 'Every pod in every namespace shipping logs to Loki.' },
-  { src: '/shots/grafana-opnsense.webp', title: 'Firewall telemetry.',
-    alt: 'Grafana dashboard showing OPNsense per-VLAN traffic',
-    cap: 'Per-VLAN throughput, packet counts, and system health off the firewall itself.' },
-  { src: '/shots/grafana-windows-dc01.webp', title: 'Windows monitoring.',
-    alt: 'Grafana Windows exporter dashboard for the domain controller',
-    cap: 'The domain controller exporting metrics alongside the Linux fleet.' },
-  { src: '/shots/ad-users-and-computers.webp', title: 'Active Directory.',
-    alt: 'Active Directory Users and Computers showing the lab.local organizational unit tree',
-    cap: 'lab.local with purpose-built OUs for servers, workstations, users, and students.' },
-  { src: '/shots/ad-certificate-authority.webp', title: 'Internal PKI.',
-    alt: 'Certification Authority console showing issued certificates',
-    cap: 'A root CA issuing real certificates from templates to the DC and internal services.' },
-  { src: '/shots/glpi-service-desk.webp', title: 'Service desk.',
-    alt: 'GLPI ticket queue showing hospital-style tickets',
-    cap: 'A working GLPI queue with realistic hospital tickets, published through Zero Trust.' },
-  { src: '/shots/cloudflare-tunnels.webp', title: 'Zero inbound ports.',
-    alt: 'Cloudflare tunnel dashboard showing two healthy tunnels',
-    cap: 'Two healthy tunnels dialing outward. Nothing on my network listens to the internet.' },
-  { src: '/shots/cloudflare-zero-trust-apps.webp', title: 'Identity-gated demos.',
-    alt: 'Cloudflare Zero Trust applications list showing browser RDP demos',
-    cap: 'Browser-based RDP into lab machines, gated behind an Access policy.' },
-  { src: '/shots/cicd-github-actions.webp', title: 'The pipeline.',
-    alt: 'GitHub Actions workflow runs, all successful',
-    cap: 'Tag, build, push, deploy. Every run green, about forty seconds each.' },
+  { src: '/shots/proxmox-vm-list.webp', title: 'Proxmox guest list.', alt: 'Proxmox server view listing seventeen virtual machines', cap: 'All seventeen VMs. Firewall, domain controller, Kubernetes nodes, storage, and the demo estate.' },
+  { src: '/shots/opnsense-dmz-rules.webp', title: 'OPNsense DMZ rules.', alt: 'OPNsense firewall rules for the DMZ interface showing a block to internal networks', cap: 'The rule that stops the offensive security segment from reaching anything internal.' },
+  { src: '/shots/kubectl-nodes.webp', title: 'The cluster.', alt: 'kubectl get nodes output showing three Ready k3s nodes', cap: 'Three nodes, Ubuntu 24.04, k3s v1.36.2, running 63 pods across 9 namespaces.' },
+  { src: '/shots/wazuh-pods-services.webp', title: 'SIEM on Kubernetes.', alt: 'kubectl output showing Wazuh manager, worker, indexer and dashboard pods', cap: 'Manager, worker, indexer and dashboard. My SIEM runs on the cluster it monitors.' },
+  { src: '/shots/kubectl-networkpolicy.webp', title: 'Default deny.', alt: 'kubectl get networkpolicy across all namespaces', cap: 'Ingress denied by default across five namespaces unless explicitly allowed.' },
+  { src: '/shots/trivy-vulnerability-reports.webp', title: 'Continuous image scanning.', alt: 'Trivy operator vulnerability reports across all namespaces', cap: 'Trivy scans every running image, including the one serving this page.' },
+  { src: '/shots/velero-backup-restore.webp', title: 'Backups and a real restore.', alt: 'Velero backup list and a completed restore drill', cap: 'Seven nightly backups retained, and a restore drill that finished in eleven seconds.' },
+  { src: '/shots/truenas-storage.webp', title: 'Storage.', alt: 'TrueNAS dashboard showing pool status and capacity', cap: 'A ZFS pool with four disks and 4.89 TiB free.' },
+  { src: '/shots/grafana-site-uptime.webp', title: 'This page, monitored.', alt: 'Grafana dashboard probing steven-garcia.dev for uptime, latency and certificate expiry', cap: 'Blackbox probes hitting this site every fifteen seconds, tracking latency and cert expiry.' },
+  { src: '/shots/grafana-loki-logs.webp', title: 'Centralized logs.', alt: 'Grafana Explore showing Loki logs from Kubernetes pods', cap: 'Every pod in every namespace shipping logs to Loki.' },
+  { src: '/shots/grafana-opnsense.webp', title: 'Firewall telemetry.', alt: 'Grafana dashboard showing OPNsense per-VLAN traffic', cap: 'Per VLAN throughput, packet counts, and system health off the firewall itself.' },
+  { src: '/shots/grafana-windows-dc01.webp', title: 'Windows monitoring.', alt: 'Grafana Windows exporter dashboard for the domain controller', cap: 'The domain controller exporting metrics alongside the Linux fleet.' },
+  { src: '/shots/ad-users-and-computers.webp', title: 'Active Directory.', alt: 'Active Directory Users and Computers showing the lab.local organizational unit tree', cap: 'lab.local with purpose built OUs for servers, workstations, users, and students.' },
+  { src: '/shots/ad-certificate-authority.webp', title: 'Internal PKI.', alt: 'Certification Authority console showing issued certificates', cap: 'A root CA issuing real certificates from templates to the DC and internal services.' },
+  { src: '/shots/glpi-service-desk.webp', title: 'Service desk.', alt: 'GLPI ticket queue showing hospital-style tickets', cap: 'A working GLPI queue with realistic hospital tickets, published through Zero Trust.' },
+  { src: '/shots/cloudflare-tunnels.webp', title: 'Zero inbound ports.', alt: 'Cloudflare tunnel dashboard showing two healthy tunnels', cap: 'Two healthy tunnels dialing outward. Nothing on my network listens to the internet.' },
+  { src: '/shots/cloudflare-zero-trust-apps.webp', title: 'Identity gated demos.', alt: 'Cloudflare Zero Trust applications list showing browser RDP demos', cap: 'Browser based RDP into lab machines, gated behind an Access policy.' },
+  { src: '/shots/cicd-github-actions.webp', title: 'The pipeline.', alt: 'GitHub Actions workflow runs, all successful', cap: 'Tag, build, push, deploy. Every run green, about forty seconds each.' },
 ];
 ---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Infrastructure Overview · Steven Garcia</title>
+<meta name="description" content="Seventeen VMs, five VLANs, a Kubernetes cluster, a SIEM, and restore tested backups. The full architecture of my homelab and how every project fits into one system." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style is:global>
+:root{
+  --paper:#EDEFEA; --paper-2:#E4E7E0; --paper-3:#D9DED4;
+  --ink:#121615; --ink-2:#3B443F; --muted:#6E7A73; --muted-2:#939E96;
+  --line:#C9CFC5; --line-2:#DBDFD6;
+  --oxide:#A0391F; --steel:#2B4759; --deck:#2E6049;
+  --night:#12181B; --night-2:#1A2226; --night-line:#2C3840;
+  --disp:'IBM Plex Sans Condensed',sans-serif;
+  --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --wrap:1220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink-2);font-family:var(--body);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 34px}
 
-<Base
-  title="Infrastructure Overview"
-  description="17 VMs, 5 VLANs, a Kubernetes cluster, a SIEM, and restore-tested backups — the full architecture of my homelab and how every project fits into one system."
->
-  <section class="shell hero" style="padding-bottom:1rem">
-    <p class="hero-role">Infrastructure overview</p>
-    <h1 style="font-size:clamp(2.1rem,6vw,3.6rem)">One environment.<br />Not eight side projects.</h1>
-    <p style="margin-top:1.4rem">
-      Every write-up on this site documents a piece of the same system. This page is the map — what
-      runs where, how the segments are separated, and how it all connects. Each layer links to the
-      deep dive that explains why I built it that way, including everything I broke getting there.
-    </p>
+.nav{position:sticky;top:0;z-index:80;background:rgba(237,239,234,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-family:var(--mono);font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:9px;color:var(--ink)}
+.led{width:7px;height:7px;border-radius:50%;background:var(--deck);animation:blip 2.6s infinite}
+@keyframes blip{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-links{display:flex;align-items:center;gap:24px;font-family:var(--mono);font-size:12.5px}
+.nav-links a{color:var(--muted);text-decoration:none}
+.nav-links a:hover{color:var(--oxide)}
+.nav-cta{background:var(--ink);color:var(--paper)!important;padding:8px 16px;border-radius:3px}
+.nav-cta:hover{background:var(--oxide);color:#fff!important}
 
-    <div class="strip">
-      {STATS.map((s) => (
-        <div class="strip-cell">
-          <span class="strip-n">{s.n}</span>
-          <span class="strip-l">{s.l}</span>
+.phead{position:relative;background:var(--night);overflow:hidden;padding:78px 0 60px}
+.phead-bg{position:absolute;inset:0}
+.phead-bg img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.15) brightness(.4)}
+.phead-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,#A0391F 0%,#2B4759 100%);mix-blend-mode:color;opacity:.9}
+.phead-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,14,16,.95) 0%,rgba(10,14,16,.7) 62%,rgba(10,14,16,.5) 100%)}
+.phead-in{position:relative;z-index:2}
+.crumb{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:18px}
+.crumb a{color:#F0A183;text-decoration:none}
+.phead h1{font-family:var(--disp);font-weight:700;font-size:clamp(38px,6vw,72px);line-height:1;letter-spacing:-.032em;color:#fff;margin-bottom:20px}
+.phead p{font-size:19px;line-height:1.55;color:rgba(255,255,255,.72);max-width:64ch}
+
+.band{background:var(--night-2);border-top:1px solid var(--night-line)}
+.stats{display:grid;grid-template-columns:repeat(6,1fr)}
+.stat{padding:26px 20px;border-right:1px solid var(--night-line);text-align:left}
+.stat:last-child{border-right:0}
+.stat-n{font-family:var(--disp);font-weight:700;font-size:40px;line-height:1;letter-spacing:-.03em;color:#fff}
+.stat-l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#F0A183;margin-top:8px}
+
+.sec{padding:96px 0}
+.sec+.sec{border-top:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:1.02fr .98fr;gap:56px;align-items:end;margin-bottom:48px}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--oxide);display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.eyebrow::after{content:'';height:1px;flex:1;background:var(--line);max-width:64px}
+h2{font-family:var(--disp);font-weight:700;font-size:clamp(34px,4.4vw,54px);line-height:1.02;letter-spacing:-.024em;color:var(--ink)}
+.lede{color:var(--muted);font-size:18px;line-height:1.6;padding-bottom:4px}
+
+.topo{border:1px solid var(--night-line);background:var(--night);border-radius:4px;overflow:hidden}
+.topo-top{display:flex;justify-content:space-between;padding:13px 22px;border-bottom:1px solid var(--night-line);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.topo-in{padding:26px 22px;overflow-x:auto}
+.topo-in svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.topo figcaption{padding:16px 22px;border-top:1px solid var(--night-line);font-size:15.5px;color:rgba(255,255,255,.6);line-height:1.55}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{border:1px solid var(--line);background:var(--paper-2);padding:26px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all .18s}
+.card:hover{border-color:var(--ink);transform:translateY(-3px)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.card h3{font-family:var(--disp);font-weight:700;font-size:21px;line-height:1.1;letter-spacing:-.018em;color:var(--ink)}
+.chip{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;border:1px solid var(--line);padding:4px 9px;border-radius:2px;white-space:nowrap;flex-shrink:0}
+.chip.ok{color:var(--deck)}
+.chip.steel{color:var(--steel)}
+.chip.ox{color:var(--oxide)}
+.card p{font-size:16px;color:var(--muted);line-height:1.56;flex:1}
+.card-go{font-family:var(--mono);font-size:11.5px;color:var(--oxide);margin-top:18px;font-weight:500}
+
+.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.shot{border:1px solid var(--line);background:var(--paper-2)}
+.shot img{width:100%;display:block;border-bottom:1px solid var(--line)}
+.shot figcaption{padding:16px 18px;font-size:15px;color:var(--muted);line-height:1.5}
+.shot figcaption b{color:var(--ink);font-weight:600}
+
+.scope{border-left:3px solid var(--oxide);background:var(--paper-2);padding:26px 30px;max-width:76ch}
+.scope-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--oxide);margin-bottom:10px}
+.scope p{font-size:17.5px;color:var(--ink-2);line-height:1.6}
+
+.next-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:48px}
+.n3{border:1px solid var(--line);background:var(--paper-2);padding:24px;text-decoration:none;color:inherit;transition:all .16s;display:block}
+.n3:hover{border-color:var(--oxide);transform:translateY(-3px)}
+.n3 h4{font-family:var(--disp);font-weight:700;font-size:19px;color:var(--ink);margin-bottom:8px}
+.n3 p{font-size:15.5px;color:var(--muted);line-height:1.5}
+.n3 span{font-family:var(--mono);font-size:11px;color:var(--oxide);display:block;margin-top:14px}
+footer{padding:34px 0 46px;display:flex;justify-content:space-between;gap:22px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);margin-top:48px}
+.fn{font-family:var(--mono);font-size:11.5px;color:var(--muted-2);line-height:1.8}
+.fl{display:flex;gap:9px;flex-wrap:wrap}
+.fl a{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line);padding:8px 14px;border-radius:3px}
+.fl a:hover{color:var(--oxide);border-color:var(--oxide)}
+
+.rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.rv.in{opacity:1;transform:none}
+a:focus-visible{outline:2px solid var(--oxide);outline-offset:3px}
+
+@media (max-width:1000px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .stat{border-bottom:1px solid var(--night-line)}
+  .stat:nth-child(3n){border-right:0}
+  .grid,.shots,.next-grid{grid-template-columns:1fr}
+  .sec-head{grid-template-columns:1fr;gap:30px}
+  .sec{padding:66px 0}
+  .phead{padding:52px 0 42px}
+  .nav-links a:not(.nav-cta){display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap nav-in">
+  <a class="brand" href="/"><span class="led"></span>steven-garcia.dev</a>
+  <div class="nav-links">
+    <a href="/#log">incidents</a><a href="/#work">work</a><a href="/#stack">stack</a>
+    <a href="/infrastructure">infrastructure</a>
+    <a class="nav-cta" href="/resume.pdf">Résumé</a>
+  </div>
+</div></nav>
+
+<header class="phead">
+  <div class="phead-bg"><img src="/photos/navy-maint.webp" alt="" aria-hidden="true" /></div>
+  <div class="phead-scrim"></div>
+  <div class="phead-in"><div class="wrap">
+    <div class="crumb"><a href="/">steven-garcia.dev</a> &nbsp;/&nbsp; infrastructure</div>
+    <h1>One environment.<br />Not eight side projects.</h1>
+    <p>Every write up on this site documents a piece of the same system. This page is the map: what runs where, how the segments are separated, and how it all connects. Each layer links to the deep dive that explains why I built it that way, including everything I broke getting there.</p>
+  </div></div>
+</header>
+
+<section class="band"><div class="stats">
+  {STATS.map((s) => (
+    <div class="stat"><div class="stat-n">{s.n}</div><div class="stat-l">{s.l}</div></div>
+  ))}
+</div></section>
+
+<section class="sec rv"><div class="wrap">
+  <div class="sec-head">
+    <div><span class="eyebrow">Topology</span><h2>How traffic actually reaches me.</h2></div>
+    <p class="lede">Two Cloudflare Tunnels dial outward, so nothing is exposed inbound. A virtualized OPNsense firewall handles routing and enforces every boundary between segments.</p>
+  </div>
+  <figure class="topo">
+    <div class="topo-top"><span>Fig. 1 · Network topology</span><span>Rev. 2026.08</span></div>
+    <div class="topo-in"><Fragment set:html={topology} /></div>
+    <figcaption>The offensive security segment is firewalled off from the servers. Confirmed by scanning across the boundary and watching the traffic die.</figcaption>
+  </figure>
+</div></section>
+
+<section class="sec rv"><div class="wrap">
+  <div class="sec-head">
+    <div><span class="eyebrow">The layers</span><h2>Seven systems, one stack.</h2></div>
+    <p class="lede">Each one has its own write up with the commands, the output, and the parts that went wrong.</p>
+  </div>
+  <div class="grid">
+    {LAYERS.map((layer) => (
+      <a class="card" href={layer.href}>
+        <div class="card-top">
+          <h3>{layer.name}</h3>
+          <span class={`chip ${layer.tone}`}>{layer.chip}</span>
         </div>
-      ))}
-    </div>
-  </section>
+        <p>{layer.body}</p>
+        <span class="card-go">{layer.cta} &rarr;</span>
+      </a>
+    ))}
+  </div>
+</div></section>
 
-  <section class="shell section reveal" style="padding-top:2.5rem">
-    <div class="section-head">
-      <p class="eyebrow">Topology</p>
-      <h2>How traffic actually reaches me.</h2>
-      <p class="lede">
-        Two Cloudflare Tunnels dial outward, so nothing is exposed inbound. A virtualized OPNsense
-        firewall handles routing and enforces every boundary between segments.
-      </p>
-    </div>
+<section class="sec rv"><div class="wrap">
+  <div class="sec-head">
+    <div><span class="eyebrow">Evidence</span><h2>Every claim above, screenshotted.</h2></div>
+    <p class="lede">Pulled from the live environment. Private addresses are shown deliberately, because they are not routable from the internet and hiding them would make this less verifiable rather than more secure.</p>
+  </div>
+  <div class="shots">
+    {EVIDENCE.map((e) => (
+      <figure class="shot">
+        <img src={e.src} alt={e.alt} loading="lazy" decoding="async" />
+        <figcaption><b>{e.title}</b> {e.cap}</figcaption>
+      </figure>
+    ))}
+  </div>
+</div></section>
 
-    <figure class="figure">
-      <Fragment set:html={topology} />
-      <figcaption>
-        The offensive-security segment is firewalled off from the servers. Confirmed by scanning
-        across the boundary and watching the traffic die.
-      </figcaption>
-    </figure>
-  </section>
+<section class="sec"><div class="wrap">
+  <div class="scope">
+    <div class="scope-k">Honest scope</div>
+    <p>I designed, deployed, broke, repaired, and documented every piece of this myself, on hardware I paid for. It is a lab, not a production environment, and I am not going to pretend otherwise. But the architecture is real, the failures were real, and I wrote all of them down.</p>
+  </div>
 
-  <section class="shell section reveal">
-    <div class="section-head">
-      <p class="eyebrow">The layers</p>
-      <h2>Seven systems, one stack.</h2>
-    </div>
+  <div class="next-grid">
+    <a class="n3" href="/#log"><h4>The incident log</h4><p>Three real failures from this environment, with the root cause and the fix.</p><span>Read the log →</span></a>
+    <a class="n3" href="/#work"><h4>All write-ups</h4><p>Ten projects, each documenting a piece of the system above.</p><span>See the work →</span></a>
+    <a class="n3" href="https://www.linkedin.com/in/steven-garcia-cis/"><h4>Get in touch</h4><p>Open to help desk, systems administration, and infrastructure support roles.</p><span>Say hello →</span></a>
+  </div>
 
-    <div class="grid">
-      {LAYERS.map((layer) => (
-        <a class="card" href={layer.href}>
-          <div class="card-top">
-            <h3>{layer.name}</h3>
-            <span class={`chip ${layer.tone}`}>{layer.chip}</span>
-          </div>
-          <p>{layer.body}</p>
-          <span class="card-go">{layer.cta} &rarr;</span>
-        </a>
-      ))}
-    </div>
-  </section>
+  <footer>
+    <div class="fn">Built, broken, and fixed by me. Served from my own Kubernetes cluster.<br>Section photography: U.S. Navy, public domain.</div>
+    <div class="fl"><a href="/resume.pdf">Résumé</a><a href="https://github.com/darthsteven444-code">GitHub</a><a href="https://www.linkedin.com/in/steven-garcia-cis/">LinkedIn</a><a href="/">Home</a></div>
+  </footer>
+</div></section>
 
-
-  <section class="shell section reveal">
-    <div class="section-head">
-      <p class="eyebrow">Evidence</p>
-      <h2>Every claim above, screenshotted.</h2>
-      <p class="lede">
-        Pulled from the live environment. Private addresses are shown deliberately — they are not
-        routable from the internet, and hiding them would make this less verifiable, not more secure.
-      </p>
-    </div>
-
-    <div class="shot-grid">
-      {EVIDENCE.map((e) => (
-        <figure class="shot">
-          <img src={e.src} alt={e.alt} loading="lazy" decoding="async" />
-          <figcaption><b>{e.title}</b> {e.cap}</figcaption>
-        </figure>
-      ))}
-    </div>
-  </section>
-
-  <section class="shell section reveal" style="padding-top:0">
-    <div class="hire">
-      <p class="eyebrow">Honest scope</p>
-      <p style="margin:0;color:var(--muted);max-width:68ch">
-        I designed, deployed, broke, repaired, and documented every piece of this myself, on
-        hardware I paid for. It is a lab, not a production environment, and I am not going to
-        pretend otherwise. But the architecture is real, the failures were real, and I wrote all of
-        them down.
-      </p>
-    </div>
-  </section>
-</Base>
+<script>
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.05,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
