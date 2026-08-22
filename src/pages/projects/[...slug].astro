@@ -1,36 +1,18 @@
 ---
 import { getCollection, render } from 'astro:content';
-import Base from '../../layouts/Base.astro';
+import ProjectV16 from '../../layouts/ProjectV16.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
-  return projects.map((entry) => ({
-    params: { slug: entry.id },
-    props: { entry },
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
   }));
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
-import ProjectSummary from '../../components/ProjectSummary.astro';
+const { project } = Astro.props;
+const { Content } = await render(project);
 ---
-<Base title={entry.data.title} description={entry.data.description}>
-  <a href="/" class="text-zinc-500 hover:text-zinc-100 text-sm">← back</a>
-  <article class="prose shell" style="padding-top:3rem;padding-bottom:4rem">
-    <header class="mb-8 not-prose">
-      <h1 class="text-3xl font-semibold lowercase">{entry.data.title}</h1>
-<ProjectSummary
-  status={entry.data.status}
-  duration={entry.data.duration}
-  stack={entry.data.stack}
-  outcome={entry.data.outcome}
-  skills={entry.data.skills}
-/>
-
-      <p class="text-zinc-500 text-sm mt-2">
-        {entry.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-      </p>
-    </header>
-    <Content />
-  </article>
-</Base>
+<ProjectV16 project={project}>
+  <Content />
+</ProjectV16>
