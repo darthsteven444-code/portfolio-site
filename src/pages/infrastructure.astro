@@ -210,6 +210,26 @@ a:focus-visible{outline:2px solid var(--oxide);outline-offset:3px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
 </style>
+
+<style is:global>
+/* LIGHTBOX-V19 */
+.lb-overlay{
+  position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;
+  background:rgba(10,14,16,.92);padding:32px;cursor:zoom-out;
+}
+.lb-overlay.open{display:flex}
+.lb-overlay img{max-width:min(92vw,1400px);max-height:82vh;object-fit:contain;
+  border:1px solid var(--line,#C9CFC5);border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lb-cap{
+  position:absolute;left:0;right:0;bottom:20px;text-align:center;
+  font-family:var(--mono,monospace);font-size:13px;color:rgba(255,255,255,.75);
+  padding:0 24px;max-width:900px;margin:0 auto;
+}
+.lb-x{position:absolute;top:18px;right:26px;color:#fff;font-family:var(--mono,monospace);
+  font-size:14px;cursor:pointer;border:1px solid rgba(255,255,255,.4);border-radius:3px;padding:8px 12px}
+.shot img,.card-img img,.hero-proj-img img,.card-shot img{cursor:zoom-in}
+</style>
+
 </head>
 <body>
 
@@ -306,5 +326,36 @@ a:focus-visible{outline:2px solid var(--oxide);outline-offset:3px}
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.05,rootMargin:'0px 0px -50px 0px'});
 document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 </script>
+
+<div class="lb-overlay" id="lb">
+  <span class="lb-x">Close &times;</span>
+  <img id="lb-img" src="" alt="" />
+  <div class="lb-cap" id="lb-cap"></div>
+</div>
+
+<script>
+/* LIGHTBOX-V19 */
+(function(){
+  const ov = document.getElementById('lb');
+  const im = document.getElementById('lb-img');
+  const cap = document.getElementById('lb-cap');
+  function openLb(src, alt, caption){
+    im.src = src; im.alt = alt || '';
+    cap.textContent = caption || '';
+    ov.classList.add('open');
+  }
+  function closeLb(){ ov.classList.remove('open'); im.src=''; }
+  document.querySelectorAll('.shot img, .card-img img, .hero-proj-img img, .card-shot img').forEach(img=>{
+    img.addEventListener('click', ()=>{
+      const fig = img.closest('figure, .card, .hero-proj, .card-img')?.parentElement || img.parentElement;
+      const figcap = img.closest('figure')?.querySelector('figcaption');
+      openLb(img.currentSrc || img.src, img.alt, figcap ? figcap.textContent.trim() : '');
+    });
+  });
+  ov.addEventListener('click', closeLb);
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeLb(); });
+})();
+</script>
+
 </body>
 </html>
