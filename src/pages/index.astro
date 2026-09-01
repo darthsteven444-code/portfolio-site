@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Steven Garcia · Infrastructure &amp; Systems</title>
-<meta name="description" content="Navy veteran running a seventeen VM homelab with a SIEM watching every host. Every project includes what went wrong."/>
+<meta name="description" content="Navy veteran, seventeen VM homelab, one SIEM watching all of it. The write-ups include the parts where I got it wrong first."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -287,7 +287,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
   <div class="hero-in"><div class="wrap">
     <div class="h-tag">Infrastructure &amp; systems · San Antonio, Texas</div>
     <h1><span><i>Steven</i></span><span><i>Garcia</i></span></h1>
-    <div class="h-sub">I stood watch on a warship's electrical plant. <b>Now I run the lab that breaks.</b></div>
+    <div class="h-sub">I stood electrical plant watches on a destroyer in Yokosuka. <b>Now I run the lab that breaks.</b></div>
     <div class="h-acts">
       <a class="btn btn-p" href="#log">Read the incident log</a>
       <a class="btn btn-ghost" href="#work">See the projects</a>
@@ -300,16 +300,16 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
 
 <!-- STATS -->
 <section class="band"><div class="stats">
-  <div class="stat"><div class="stat-n" data-count="17">0</div><div class="stat-l">Virtual machines</div><div class="stat-s">Five VLANs, default deny between segments, one Dell workstation.</div></div>
-  <div class="stat"><div class="stat-n" data-count="7">0</div><div class="stat-l">Monitored hosts</div><div class="stat-s">Windows, Ubuntu and Oracle Linux reporting to a single SIEM.</div></div>
-  <div class="stat"><div class="stat-n" data-count="11" data-suffix="s">0</div><div class="stat-l">Restore drill</div><div class="stat-s">Destroyed the cluster state deliberately, then brought it back.</div></div>
+  <div class="stat"><div class="stat-n" data-count="17">0</div><div class="stat-l">Virtual machines</div><div class="stat-s">Five VLANs on one Dell workstation, default deny between segments. I have locked myself out of my own network with that rule twice.</div></div>
+  <div class="stat"><div class="stat-n" data-count="7">0</div><div class="stat-l">Monitored hosts</div><div class="stat-s">Windows, Ubuntu and Oracle Linux, all reporting into one SIEM.</div></div>
+  <div class="stat"><div class="stat-n" data-count="11" data-suffix="s">0</div><div class="stat-l">Restore drill</div><div class="stat-s">I wiped the cluster state on purpose to find out whether the backups were real.</div></div>
 </div></section>
 
 <!-- SCHEMATIC -->
 <section class="sec rv"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">The environment</span><h2>Not eight side projects.<br>One system.</h2></div>
-    <p class="lede">Traffic arrives through two Cloudflare Tunnels, so no inbound ports are open on my network. A virtualized firewall routes five segments and denies traffic between them by default. Everything below runs on one hypervisor.</p>
+    <div><h2>How the whole thing is wired.</h2></div>
+    <p class="lede">All of it runs on one hypervisor in my house. Traffic comes in through two Cloudflare Tunnels so there are no inbound ports open on my network, which started less as a security decision and more because my ISP put me behind CGNAT and I could not forward a port if I wanted to. A virtualized firewall routes the five segments and denies traffic between them by default.</p>
   </div>
   <figure class="plate" id="plate">
     <div class="plate-top"><span>Fig. 1 · Environment</span><span>Rev. 2026.08</span></div>
@@ -368,32 +368,30 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
 <!-- INCIDENT LOG -->
 <section class="logband rv" id="log"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">Incident log</span><h2>The part nobody posts.</h2></div>
-    <p class="lede">Anyone can publish a build that worked. These are real failures from my own environment: what I saw, what actually caused it, and what I changed. In two of the three, the root cause was not what the symptom pointed at.</p>
+    <div><span class="eyebrow">Incident log</span><h2>Three things that broke.</h2></div>
+    <p class="lede">Anyone can publish a build that worked. These are real failures out of my own environment, including the parts where I had the wrong answer first. Two of the three had nothing to do with what the symptom was pointing at.</p>
   </div>
   <div class="ledger">
     <div class="ledger-top"><span>Selected incidents · 2026</span><span>Symptom · Root cause · Correction</span></div>
     <article class="entry">
       <div class="entry-meta"><div class="entry-no">01</div>17 AUG 2026<br>storage<br><span style="color:#4ED18C">resolved, 0 data loss</span></div>
       <div><div class="entry-t">Storage pool degraded, one disk faulted</div>
-        <div class="row"><span class="rk a">Symptom</span><p>RAIDZ1 dropped to <b>zero redundancy</b> after 189 read errors on a 4&nbsp;TB SAS drive. Every VM backup lives on that pool.</p></div>
-        <div class="row"><span class="rk b">Root cause</span><p>Not the disk. All four drives had <b>zero grown defects</b> but were running 51 to 56&nbsp;°C against a 55&nbsp;°C trip point. The cage had no airflow, and SMART does not traverse virtio, so nothing was watching temperature.</p></div>
-        <div class="row"><span class="rk c">Correction</span><p>Cooled the cage, watched all four drop 8&nbsp;°C, then cleared the fault. Resilvered in <b>28 seconds</b>. No replacement drive, no data lost.</p></div>
+        <div class="row"><span class="rk a">Symptom</span><p>RAIDZ1 dropped to zero redundancy after 189 read errors on a 4&nbsp;TB SAS drive. Every VM backup I have lives on that pool.</p></div>
+        <div class="row"><span class="rk b">Root cause</span><p>Not the disk. All four drives had zero grown defects but were sitting at 51 to 56&nbsp;°C against a 55&nbsp;°C trip point. The cage had no airflow, and SMART does not traverse virtio, so nothing was watching temperature at all. I had a replacement drive in the cart before it occurred to me to check.</p></div>
+        <div class="row"><span class="rk c">Correction</span><p>Cooled the cage, watched all four drop 8&nbsp;°C, cleared the fault. Resilvered in 28 seconds. No new drive, nothing lost.</p></div>
       </div>
     </article>
     <article class="entry">
       <div class="entry-meta"><div class="entry-no">02</div>07 AUG 2026<br>kernel<br><span style="color:#4ED18C">resolved</span></div>
-      <div><div class="entry-t">Two unrelated services failing for one reason</div>
-        <div class="row"><span class="rk a">Symptom</span><p>The SIEM reported <b>no API available</b> and every agent showed disconnected. Separately, the log collector could not start a file watcher.</p></div>
-        <div class="row"><span class="rk b">Root cause</span><p>A single kernel setting. <b>fs.inotify.max_user_instances</b> was still at its default of 128 and had been exhausted, taking down two systems that looked unconnected.</p></div>
-        <div class="row"><span class="rk c">Correction</span><p>Raised and persisted the limit across all three nodes. Both services recovered without touching anything else.</p></div>
+      <div><div class="entry-t">Two things broke the same week for the same reason</div>
+        <div class="row"><span class="rk b">What happened</span><p>The SIEM went to no API available and every agent showed disconnected. Separately, and as far as I could tell unrelated, the log collector would not start a file watcher. I spent most of a day treating those as two problems. They were one. fs.inotify.max_user_instances was still sitting at its default of 128 and had been exhausted, which quietly took down two systems that have nothing to do with each other. I raised it and persisted it across all three nodes and both came back without me touching either service.</p></div>
       </div>
     </article>
     <article class="entry">
       <div class="entry-meta"><div class="entry-no">03</div>04 AUG 2026<br>availability<br><span style="color:#4ED18C">resolved, prevented</span></div>
       <div><div class="entry-t">Control plane node unreachable for 23 hours</div>
         <div class="row"><span class="rk a">Symptom</span><p>The node answered nothing on the network, yet a cron job on it kept writing to a log file the entire time.</p></div>
-        <div class="row"><span class="rk b">Root cause</span><p>An unattended upgrade triggered a reboot that <b>hung mid shutdown</b>. systemd had already torn down every mount and network unit, so the machine was alive but deaf.</p></div>
+        <div class="row"><span class="rk b">Root cause</span><p>An unattended upgrade triggered a reboot that hung mid shutdown. systemd had already torn down every mount and network unit, so the machine was alive but deaf.</p></div>
         <div class="row"><span class="rk c">Correction</span><p>Disabled automatic reboots and capped the unit stop timeout, so a stuck service can no longer stall a shutdown indefinitely.</p></div>
       </div>
     </article>
@@ -403,8 +401,8 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
 <!-- WORK -->
 <section class="sec rv" id="work"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">Write-ups</span><h2>Start with this one.</h2></div>
-    <p class="lede">Each write-up includes the commands, the output, and the mistakes in between. Nine more are listed below if you want the whole estate.</p>
+    <div><h2>Start with this one.</h2></div>
+    <p class="lede">Each one has the commands, the output, and the parts in between where I was wrong. Nine more underneath if you want to see the whole estate.</p>
   </div>
   <a class="hero-proj" href="/projects/vulnerability-management">
     <div class="hero-proj-img"><img src="/shots/wazuh-agents.webp" alt="Wazuh agent listing" loading="lazy"></div>
@@ -425,7 +423,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
       <div class="card-img"><img src="/shots/velero-backup-restore.webp" alt="Velero backup listing" loading="lazy"></div>
       <div class="card-b"><span class="chip">Restore tested</span>
         <h3>Backups that actually restore</h3>
-        <p>Two layers of disaster recovery, proven by deliberately destroying things. The Kubernetes drill came back in eleven seconds. An untested backup is a guess.</p>
+        <p>Two layers of disaster recovery, proven by deliberately destroying things. The Kubernetes drill came back in eleven seconds. Before that I had never actually run a restore, only scheduled them, which I would not recommend to anyone.</p>
         <span class="card-go">Read the write-up →</span></div>
     </a>
     <a class="card" href="/projects/cloud-cost-analysis">
@@ -460,21 +458,21 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
 <!-- RECEIPTS -->
 <section class="sec rv"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">Receipts</span><h2>Pulled from my own systems.</h2></div>
-    <p class="lede">Not stock images, and not a tutorial someone else wrote. These came out of the environment above, running right now.</p>
+    <div><h2>Pulled from my own systems.</h2></div>
+    <p class="lede">These came straight out of the environment above, running right now. Click any of them to enlarge, the terminal ones are small.</p>
   </div>
   <div class="shots">
-    <figure class="shot"><img src="/shots/proxmox-datacenter.webp" alt="Proxmox summary" loading="lazy"><figcaption><b>Proxmox.</b> Seventeen guests, 88 threads, 125 GiB of RAM on one host.</figcaption></figure>
-    <figure class="shot"><img src="/shots/wazuh-agents.webp" alt="Wazuh agents" loading="lazy"><figcaption><b>Wazuh SIEM.</b> Agents active across Windows, Ubuntu and Oracle Linux.</figcaption></figure>
-    <figure class="shot"><img src="/shots/velero-backup-restore.webp" alt="Velero backups" loading="lazy"><figcaption><b>Velero.</b> Nightly cluster backups and a restore drill that finished in eleven seconds.</figcaption></figure>
+    <figure class="shot"><img src="/shots/proxmox-datacenter.webp" alt="Proxmox summary" loading="lazy"><figcaption>Proxmox. Seventeen guests, 88 threads, 125 GiB of RAM on one host.</figcaption></figure>
+    <figure class="shot"><img src="/shots/wazuh-agents.webp" alt="Wazuh agents" loading="lazy"><figcaption>Wazuh SIEM. Agents active across Windows, Ubuntu and Oracle Linux.</figcaption></figure>
+    <figure class="shot"><img src="/shots/velero-backup-restore.webp" alt="Velero backups" loading="lazy"><figcaption>Velero. Nightly cluster backups, and the restore drill that finished in eleven seconds.</figcaption></figure>
   </div>
 </div></section>
 
 <!-- STACK -->
 <section class="sec rv" id="stack"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">Hands-on with</span><h2>Running, not read about.</h2></div>
-    <p class="lede">Everything here is deployed in the environment above, or was used to build and test it. If it is on this list I have broken it at least once.</p>
+    <div><span class="eyebrow">Hands-on with</span><h2>Everything here is deployed.</h2></div>
+    <p class="lede">If it is on this list it is running in the environment above, or I used it to build and test that environment. I have also broken every single one of them at least once.</p>
   </div>
   <div class="stack">
     <div class="sg"><h4>Virtualization</h4><p>Proxmox VE · KVM · GPU passthrough · TrueNAS · ZFS · NFS</p></div>
@@ -492,28 +490,24 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
 <!-- FAQ -->
 <section class="sec rv"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">Straight answers</span><h2>The questions you are already asking.</h2></div>
-    <p class="lede">If you are weighing someone without professional IT experience, these are probably the objections in your head. Here they are, answered directly.</p>
+    <div><span class="eyebrow">Straight answers</span><h2>Questions you probably have.</h2></div>
+    <p class="lede">These come up every time, so I would rather answer them here than make you ask.</p>
   </div>
   <div class="faq">
     <details open><summary>Why hire someone with no professional IT experience?</summary>
-      <p>You should weigh that seriously. What I offer instead is evidence: an environment I designed and operate, a written record of failures I diagnosed with nobody to escalate to, and the habit of documenting what I changed and why. I am applying for entry level roles because that is what I am. But I will not be starting from zero on day one.</p></details>
+      <p>Fair question and I am not going to argue with it. What I have instead is an environment I built and still run, plus a written record of things I broke and had to work out with nobody to escalate to. That is not the same as production experience and I know it. What it does mean is that the first time something goes sideways on the job will not be the first time I have seen it.</p></details>
     <details><summary>Is this really yours, or did you follow a guide?</summary>
-      <p>Mine. Every screenshot comes out of my own environment, and every write-up includes what went wrong, which is the tell, because tutorials never do. The incident log above is the clearest proof. Those root causes took days to find and none of them were what the symptom suggested.</p></details>
-    <details><summary>What are you actually looking for?</summary>
-      <p>A first IT role in the San Antonio area: help desk, systems administration, or infrastructure support. I live in Texas and am open to hybrid or on site. I work nights in a hospital lab now, so I am used to being the person who is there when something breaks at three in the morning.</p></details>
+      <p>Mine. The screenshots come out of my own environment and the write-ups include what went wrong, which is the tell, because tutorials never do. The incident log above is the clearest proof I have got. Those root causes took days apiece and not one of them was what the symptom suggested.</p></details>
     <details><summary>What does the Navy background have to do with it?</summary>
-      <p>I was a Gas Turbine Systems Technician (Electrical) in Yokosuka, Japan from 2009 to 2013, standing watch on a warship's electrical plant and maintaining propulsion control systems and alarm circuitry. That is where I learned to isolate a fault methodically instead of guessing, and to accept that the obvious explanation is usually wrong. It is the most transferable thing I brought with me.</p></details>
-    <details><summary>How is this site served?</summary>
-      <p>From the cluster described above. A tag push builds a hardened non root container, pushes it to a registry, and rolls it out in about forty seconds end to end. It runs active active from my homelab and an ARM cluster in Oracle Cloud, reached through Cloudflare Tunnels with no inbound ports open on my network.</p></details>
+      <p>Gas Turbine Systems Technician, electrical side, Yokosuka, 2009 to 2013. Propulsion control systems and alarm circuitry, standing watch on the plant. It taught me to isolate a fault instead of guessing at it, and to assume the obvious explanation is wrong until it survives a test. That is the most transferable thing I brought home with me.</p></details>
   </div>
 </div></section>
 
 <!-- CLOSE -->
 <section class="sec"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">Where I am headed</span><h2>Still learning.<br>That is the whole point.</h2></div>
-    <p class="lede">When something breaks at 2am in my lab, nobody else is coming to fix it, and it always gets fixed. I am looking for a first IT role where I can do that work for a team instead of for myself.</p>
+    <div><h2>I am still learning.</h2></div>
+    <p class="lede">When something breaks at 2am in my lab, nobody else is coming to fix it, and it gets fixed anyway. I would like to do that for a team instead of just for myself. Entry level is where I am and I am fine saying so out loud.</p>
   </div>
   <div class="c3s">
     <a class="c3" href="/resume.pdf"><h4>Résumé</h4><p>One page, current, with the infrastructure work described in plain terms.</p><span>Download PDF →</span></a>
@@ -527,7 +521,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
     <div><div class="lk">Background</div><div class="lv">U.S. Navy veteran, Gas Turbine Systems Technician (Electrical)</div></div>
   </div>
   <footer>
-    <div class="fn">Built, broken, and fixed by me. Served from my own Kubernetes cluster.<br>Section photography: U.S. Navy, public domain.</div>
+    <div class="fn">Built, broken, and fixed by me. This page is served out of my own Kubernetes cluster, and out of an ARM cluster in Oracle Cloud when the one at home is having a day.<br>Section photography: U.S. Navy, public domain.</div>
     <div class="fl"><a href="/resume.pdf">Résumé</a><a href="https://github.com/darthsteven444-code">GitHub</a><a href="https://www.linkedin.com/in/steven-garcia-cis/">LinkedIn</a><a href="/infrastructure">Infrastructure</a></div>
   </footer>
 </div></section>
