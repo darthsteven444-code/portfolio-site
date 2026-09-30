@@ -369,27 +369,43 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--oxide);outline-off
 <!-- INCIDENT LOG -->
 <section class="logband rv" id="log"><div class="wrap">
   <div class="sec-head">
-    <div><span class="eyebrow">Incident log</span><h2>Three things that broke.</h2></div>
-    <p class="lede">Anyone can publish a build that worked. These are real failures out of my own environment, including the parts where I had the wrong answer first. Two of the three had nothing to do with what the symptom was pointing at.</p>
+    <div><span class="eyebrow">Incident log</span><h2>Five things that broke.</h2></div>
+    <p class="lede">Anyone can publish a build that worked. These are real failures out of my own environment, including the parts where I had the wrong answer first. Four of the five had nothing to do with what the symptom was pointing at, and the two most recent were caused by something I built.</p>
   </div>
   <div class="ledger">
     <div class="ledger-top"><span>Selected incidents · 2026</span><span>Symptom · Root cause · Correction</span></div>
     <article class="entry">
-      <div class="entry-meta"><div class="entry-no">01</div>17 AUG 2026<br>storage<br><span style="color:#4ED18C">resolved, 0 data loss</span></div>
-      <div><div class="entry-t">Storage pool degraded, one disk faulted</div>
+      <div class="entry-meta"><div class="entry-no">01</div>29 SEP 2026<br>hypervisor<br><span style="color:#4ED18C">resolved, no reboot</span></div>
+      <div><div class="entry-t"><a href="/projects/nfs-wedge/" style="text-decoration:underline;text-underline-offset:3px">A backup job hung for 38 hours and took the hypervisor with it</a></div>
+        <div class="row"><span class="rk a">Symptom</span><p>Load average of 42 on a host using 4 percent of its CPU and almost no disk. Then <code>ps</code> hung while I was trying to list the stuck processes, and so did every Proxmox command after it.</p></div>
+        <div class="row"><span class="rk b">Root cause</span><p>The nightly backup job was writing to an NFS export from the pool it was backing up. That pool was already degraded, the NAS stopped answering twelve minutes in, and the share was a hard mount, so the kernel retried for 38 hours while every process that touched it piled up in uninterruptible sleep. The tools I reached for to diagnose it were downstream of the thing that was broken.</p></div>
+        <div class="row"><span class="rk c">Correction</span><p>Lazy unmounted the share, which freed the tooling instantly, then cancelled the job. Load drained from 45 to 15 in six minutes with no reboot. The job and the storage stay disabled until the backup target lives somewhere that is not the pool being backed up.</p></div>
+      </div>
+    </article>
+    <article class="entry">
+      <div class="entry-meta"><div class="entry-no">02</div>26 SEP 2026<br>storage<br><span style="color:#4ED18C">resolved, 0 data loss</span></div>
+      <div><div class="entry-t"><a href="/projects/tank-rescue/" style="text-decoration:underline;text-underline-offset:3px">5.87 TiB on a degraded array with no backups</a></div>
+        <div class="row"><span class="rk a">Symptom</span><p>Same pool, second fault, but this time a genuine unrecovered read error rather than heat, with a second disk flagged alongside it. I went to check my backup configuration and found it completely empty. No replication, no snapshots, no rsync tasks, nothing.</p></div>
+        <div class="row"><span class="rk b">Root cause</span><p>I had built a SIEM, a metrics stack, and an offsite Velero pipeline that ships Kubernetes objects to Oracle Cloud, and had never configured a single backup task against the pool all of it sits on. Every Proxmox VM backup I owned lived there and nowhere else.</p></div>
+        <div class="row"><span class="rk c">Correction</span><p>Copied everything off before touching a disk. 6.55 TB across 31,383 files, zero read errors off a RAIDZ1 with no parity left, verified three independent ways: an rsync dry run, a read only fsck, and the filesystem block accounting against the byte count. Then replaced the faulted drive.</p></div>
+      </div>
+    </article>
+    <article class="entry">
+      <div class="entry-meta"><div class="entry-no">03</div>17 AUG 2026<br>storage<br><span style="color:#4ED18C">resolved, 0 data loss</span></div>
+      <div><div class="entry-t"><a href="/projects/thermal-fault/" style="text-decoration:underline;text-underline-offset:3px">Storage pool degraded, one disk faulted</a></div>
         <div class="row"><span class="rk a">Symptom</span><p>RAIDZ1 dropped to zero redundancy after 189 read errors on a 4&nbsp;TB SAS drive. Every VM backup I have lives on that pool.</p></div>
         <div class="row"><span class="rk b">Root cause</span><p>Not the disk. All four drives had zero grown defects but were sitting at 51 to 56&nbsp;°C against a 55&nbsp;°C trip point. The cage had no airflow, and SMART does not traverse virtio, so nothing was watching temperature at all. I had a replacement drive in the cart before it occurred to me to check.</p></div>
         <div class="row"><span class="rk c">Correction</span><p>Cooled the cage, watched all four drop 8&nbsp;°C, cleared the fault. Resilvered in 28 seconds. No new drive, nothing lost.</p></div>
       </div>
     </article>
     <article class="entry">
-      <div class="entry-meta"><div class="entry-no">02</div>07 AUG 2026<br>kernel<br><span style="color:#4ED18C">resolved</span></div>
+      <div class="entry-meta"><div class="entry-no">04</div>07 AUG 2026<br>kernel<br><span style="color:#4ED18C">resolved</span></div>
       <div><div class="entry-t">Two things broke the same week for the same reason</div>
         <div class="row"><span class="rk b">What happened</span><p>The SIEM went to no API available and every agent showed disconnected. Separately, and as far as I could tell unrelated, the log collector would not start a file watcher. I spent most of a day treating those as two problems. They were one. fs.inotify.max_user_instances was still sitting at its default of 128 and had been exhausted, which quietly took down two systems that have nothing to do with each other. I raised it and persisted it across all three nodes and both came back without me touching either service.</p></div>
       </div>
     </article>
     <article class="entry">
-      <div class="entry-meta"><div class="entry-no">03</div>04 AUG 2026<br>availability<br><span style="color:#4ED18C">resolved, prevented</span></div>
+      <div class="entry-meta"><div class="entry-no">05</div>04 AUG 2026<br>availability<br><span style="color:#4ED18C">resolved, prevented</span></div>
       <div><div class="entry-t">Control plane node unreachable for 23 hours</div>
         <div class="row"><span class="rk a">Symptom</span><p>The node answered nothing on the network, yet a cron job on it kept writing to a log file the entire time.</p></div>
         <div class="row"><span class="rk b">Root cause</span><p>An unattended upgrade triggered a reboot that hung mid shutdown. systemd had already torn down every mount and network unit, so the machine was alive but deaf.</p></div>
