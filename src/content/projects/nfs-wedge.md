@@ -4,10 +4,10 @@ description: "a backup job hung for 38 hours and dragged the whole hypervisor do
 date: 2026-09-29
 tags: ["proxmox", "nfs", "zfs", "truenas", "incident"]
 category: "infrastructure"
-status: "Resolved, resilver running"
+status: "Resolved, full parity restored, backups rebuilt off the pool"
 duration: "38 hours hung, 15 minutes to clear"
 stack: ["Proxmox VE", "NFS", "ZFS", "TrueNAS SCALE", "vzdump", "Linux kernel diagnostics"]
-outcome: "Cleared a 38 hour hypervisor wedge with one command and no reboot, then found the architecture mistake that caused it: the backup job was writing to the pool it was backing up."
+outcome: "Cleared a 38 hour hypervisor wedge with one command and no reboot, found the architecture mistake behind it, and rebuilt backups onto separate physical hardware so the same failure cannot happen twice."
 skills: ["Incident response", "Linux troubleshooting", "NFS", "Kernel diagnostics", "Dependency analysis", "Proxmox administration"]
 ---
 
@@ -145,10 +145,36 @@ pvesh set /cluster/backup/<id> --enabled 0
 
 Storage disabled so nothing could remount it. Job disabled so it could not fire again while I was asleep or halfway through a rebuild. Both stay off until the array is healthy and the backup target lives somewhere that is not the pool being backed up.
 
-Then I replaced the faulted drive and started the resilver: 8.08 TB to rebuild at 108 MB/s, temperatures at 33 to 39 C with a box fan on the open case, about twenty hours to go.
+Then I replaced the faulted drive and let it rebuild.
+
+```
+scan: resilvered 2.02T in 05:59:24 with 0 errors
+tank          ONLINE  0 0 0
+  raidz1-0    ONLINE  0 0 0
+errors: No known data errors
+```
+
+Five hours fifty nine minutes, 2.02 TB, sustained 399 MB/s, zero errors. Temperatures held between 34 and 42 C the whole way, against the 51 to 56 C that started all of this in August. Every surviving member reported 0 read, 0 write and 0 checksum for the entire run, including the drive that had been flagged alongside the one that actually faulted.
 
 ## Three things worth keeping
 
 - **Check whether the tool you are using sits downstream of the failure.** If `ps` hangs, that is data, not a broken command. Pick something that touches neither the blocked subsystem nor `/proc`.
 - **Read all three load averages, not the first one.** The relationship between the one, five and fifteen minute figures told me this was not my fault before I had touched anything, and that saved me from chasing the drives I had just carried in from the porch.
 - **Draw the dependencies.** I had backups. I had monitoring. I had a NAS. What I did not have was a diagram showing that the backup job and its target were the same failure domain, and that is the only thing here that would have prevented the whole night.
+
+## How it actually got fixed
+
+Four days later, and this part matters more than the unmount did.
+
+The backup job now writes to a **Proxmox Backup Server running on a second physical machine**. Not a different dataset, not a different share. A different computer. If the pool degrades again, the backup target is not sitting on top of it.
+
+```
+vzdump   daily 02:00  ->  PBS on separate hardware
+keep     7 daily, 4 weekly, 3 monthly
+```
+
+That changed the economics too. The old job wrote full compressed images and piled up 1.26 TiB on the pool it was supposed to be protecting. PBS stores each unique block once across every machine, so the first test backup I ran came back 62 percent deduplicated before it had anything else to compare itself against.
+
+The pool got what it never had either: snapshot tasks, hourly for two days and daily for a month. Those live on the pool, so they do nothing if it dies, and that is exactly why they are not a substitute for the backups above. They cover the far more common case, which is me deleting something I wanted.
+
+And I added the alert that would have caught this in ten minutes instead of thirty eight hours. Not a load alert. A conventional one compares load average against CPU count, which on 88 cores means a threshold near 88, and this peaked at 45 with the processor 96 percent idle. The metric that matters is `node_procs_blocked`, which counts processes stuck in uninterruptible sleep. There were about forty of them, and nothing in my lab had ever looked at that number.
