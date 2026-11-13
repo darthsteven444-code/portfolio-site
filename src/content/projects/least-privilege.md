@@ -2,7 +2,7 @@
 title: "the keys I didn't know I was handing out"
 description: "three systems in my lab, a kubernetes cluster, a bot I built, and a cloud ticketing integration, all ended up holding more access than they used. this is me walking each one back to the least it could get away with."
 date: 2026-11-13
-category: security engineering
+category: "security and monitoring"
 tags: ["least privilege", "RBAC", "Kubernetes", "ServiceNow", "IAM", "service accounts", "threat modeling"]
 status: "Done, and now a habit"
 duration: "Spread across a few projects"
